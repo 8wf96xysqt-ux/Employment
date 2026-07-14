@@ -1,0 +1,231 @@
+#include "CollisionManager.h"
+#include "CollisionAABB.h"
+#include "CollisionSphere.h"
+#include "CollisionOBB.h"
+#include "CollisionSlope.h"
+#include "../Player/PlayerManager.h"
+#include "../Player/Player.h"
+#include "../StageObject/Block/Block.h"
+#include "../StageObject/StageObjectManager.h"
+
+
+
+
+// 静的変数の初期化
+CollisionManager* CollisionManager::m_Instance = nullptr;
+
+// コンストラクタ
+CollisionManager::CollisionManager()
+{
+	// 各配列を先頭から末尾までまわす範囲for文
+	for(int i = 0 ; i < COLLISION_MAX; i++)
+	{
+		m_AABB[i] = nullptr;
+		m_Sphere[i] = nullptr;
+		m_Slope[i] = nullptr;
+		m_OBB[i] = nullptr;
+	}
+}
+
+// デストラクタ
+CollisionManager::~CollisionManager()
+{
+	// 削除時の後始末忘れを防止する
+	Fin();
+}
+
+// Update
+void CollisionManager::Update()
+{
+	
+}
+
+void CollisionManager::Draw()
+{
+	// m_AABBを先頭から末尾までまわす範囲for文
+	for (auto aabb : m_AABB)
+	{
+		if (aabb)
+		{
+			aabb->Draw();
+		}
+	}
+
+	// m_Sphereを先頭から末尾までまわす範囲for文
+	for (auto sphere : m_Sphere)
+	{
+		if (sphere)
+		{
+			sphere->Draw();
+		}
+	}
+	// m_OBBを先頭から末尾までまわす範囲for文
+	for (auto obb : m_OBB)
+	{
+		if (obb)
+		{
+			obb->Draw();
+		}
+	}
+}
+
+void CollisionManager::Fin()
+{
+	for (int i = 0; i < COLLISION_MAX; i++)
+	{
+		// 使用されているところだけ削除して未使用状態にする
+		if (m_AABB[i])
+		{
+			delete m_AABB[i];
+			m_AABB[i] = nullptr;
+		}
+		if (m_Sphere[i])
+		{
+			delete m_Sphere[i];
+			m_Sphere[i] = nullptr;
+		}
+
+		if (m_OBB[i])
+		{
+			delete m_OBB[i];
+			m_OBB[i] = nullptr;
+		}
+	}
+}
+
+CollisionAABB* CollisionManager::CreateAABB()
+{
+	CollisionAABB* result = nullptr;
+
+	// m_AABBを先頭から末尾までまわす範囲for文
+	for (int i = 0; i < COLLISION_MAX; i++)
+	{
+		// 未使用のAABBか
+		if (!m_AABB[i])
+		{
+			// AABBを生成して配列に保存
+			m_AABB[i] = result = new CollisionAABB;
+			break;
+		}
+	}
+
+	return result;
+}
+
+void CollisionManager::DeleteAABB(CollisionAABB* targetAABB)
+{
+	// m_AABBを先頭から末尾までまわす範囲for文
+	for (int i = 0; i < COLLISION_MAX; i++)
+	{
+		// 参照先が一致するAABBを探す
+		if (m_AABB[i] == targetAABB)
+		{
+			// 見つかったら削除
+			delete targetAABB;
+			// 未使用状態にするためnullptr
+			m_AABB[i] = nullptr;
+			break;
+		}
+	}
+}
+
+// Sphereを生成する
+CollisionSphere* CollisionManager::CreateSphere()
+{
+	CollisionSphere* result = nullptr;
+
+	for (int i = 0; i < COLLISION_MAX; i++)
+	{
+		// 未使用のSphereか
+		if (!m_Sphere[i])
+		{
+			// Sphereを生成して配列に保存
+			m_Sphere[i] = result = new CollisionSphere;
+			break;
+		}
+	}
+
+	return result;
+}
+
+// Sphereを削除する
+void CollisionManager::DeleteSphere(CollisionSphere* targetSphere)
+{
+	for (int i = 0; i < COLLISION_MAX; i++)
+	{
+		// 参照先が一致するSphereを探す
+		if (m_Sphere[i] == targetSphere)
+		{
+			// 見つかったら削除
+			delete targetSphere;
+			// 未使用状態にするためnullptr
+			m_Sphere[i] = nullptr;
+			break;
+		}
+	}
+}
+
+CollisionSlope* CollisionManager::CreateSlope()
+{
+	CollisionSlope* result = nullptr;
+
+	for (int i = 0; i < COLLISION_MAX; i++)
+	{
+		if (!m_Slope[i])
+		{
+			m_Slope[i] = result = new CollisionSlope;
+			break;
+		}
+	}
+
+	return result;
+}
+
+void CollisionManager::DeleteSlope(CollisionSlope* targetSlope)
+{
+	for (int i = 0; i < COLLISION_MAX; i++)
+	{
+		if (m_Slope[i] == targetSlope)
+		{
+			delete targetSlope;
+			m_Slope[i] = nullptr;
+			break;
+		}
+	}
+}
+
+CollisionOBB* CollisionManager::CreateOBB()
+{
+	CollisionOBB* result = nullptr;
+
+	for (int i = 0; i < COLLISION_MAX; i++)
+	{
+		if (!m_OBB[i])
+		{
+			m_OBB[i] = result = new CollisionOBB;
+			break;
+		}
+	}
+
+	return result;
+}
+
+void CollisionManager::DeleteOBB(CollisionOBB* targetOBB)
+{
+	for (int i = 0; i < COLLISION_MAX; i++)
+	{
+		if (m_OBB[i] == targetOBB)
+		{
+			delete targetOBB;
+			m_OBB[i] = nullptr;
+			break;
+		}
+	}
+}
+void CollisionManager::CheckCollision()
+{
+	Player* player = PlayerManager::GetInstance()->GetPlayer();
+	auto objects = StageObjectManager::GetInstance()->GetStageObjects();
+
+	player->CheckHitStageObjects(objects);
+}
