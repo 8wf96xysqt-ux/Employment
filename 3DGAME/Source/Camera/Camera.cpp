@@ -51,7 +51,7 @@ void Camera::Step()
 
 void Camera::SetStrategy(std::unique_ptr<CameraStrategy> strategy)
 {
-	m_Strategy = std::move(strategy);
+	m_Strategy = std::move(strategy); //Š—LŒ ˆÚ“®
 	if (m_Strategy)
 	{
 		m_Strategy->Start(this); // Ø‚è‘Ö‚í‚Á‚½uŠÔ‚Ì‰Šú‰»ˆ—‚ğŒÄ‚Ô

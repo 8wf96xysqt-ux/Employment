@@ -5,8 +5,11 @@ class CollisionAABB;
 class CollisionSphere;
 class CollisionOBB;
 class StageObject;
+class PlayerStateBase;
+
 enum PlayerAnimationType
 {
+	PLAYER_ANIMATION_LANDING,
 	PLAYER_ANIMATION_DIE,
 	PLAYER_ANIMATION_FALLING,
 	PLAYER_ANIMATION_AIRCOMBO1,
@@ -20,6 +23,7 @@ enum PlayerAnimationType
 	PLAYER_ANIMATION_JUMP,
 	PLAYER_ANIMATION_RUN,
 	PLAYER_ANIMATION_WALK,
+	PLAYER_ANIMATION_ROLLING,
 };
 
 enum class ComboType
@@ -46,20 +50,62 @@ public:
 	void Fin();		// 終了
 private:
 	void UpdateAttackOBB();
+private:
+	float RotCap(float rot);
+	void DirectionRot();		// 方向回転
+private:
+	void UpdateMove();
+	void UpdateJump();
+	void UpdateGravity();
+	void UpdateAttack();
+	void UpdateRolling();
+	void UpdateInvincible();
 public:
 	VECTOR GetPos() { return m_Pos; }
 	VECTOR GetRot() const { return m_Rot; }
 	CollisionAABB* GetAABB() { return m_AABB; }
 	CollisionSphere* GetSphereCollision() { return m_SphereCollision; }
 	CollisionOBB* GetAttackOBB() { return m_AttackOBB; }
-private:
-	void PlayAnimation(PlayerAnimationType anim, bool isLoop);
-	void UpdateAnimation();
-	// アニメーションの種類ごとの再生速度を返す
-	float GetAnimationSpeed(PlayerAnimationType anim) const;
+	bool IsInvincible() const { return m_IsInvincible; }
+	// State用
+	VECTOR GetMove()
+	{
+		return m_Move;
+	}
+	void SetMove(VECTOR move)
+	{
+		m_Move = move;
+	}
+	bool GetIsGround()
+	{
+		return m_IsGround;
+	}
+	bool GetIsRolling()
+	{
+		return m_IsRolling;
+	}
+	void SetTargetYaw(float yaw)
+	{
+		m_TargetYawValue = yaw;
+	}
+	void StateDirectionRot()
+	{
+		DirectionRot();
+	}
+	void StatePlayAnimation(PlayerAnimationType anim, bool loop)
+	{
+		PlayAnimation(anim, loop);
+	}
+
 public:
+	void PlayAnimation(PlayerAnimationType anim, bool isLoop);
+
+private:
+	void UpdateAnimation();
+    float GetAnimationSpeed(PlayerAnimationType anim) const; public:
 	void CheckHitStageObjects(const std::vector<StageObject*>objects);
 private:
+	PlayerStateBase* m_pState;
 	int m_Handle;	// 画像ハンドル
 	int m_AnimationAttachIndex;	// アニメーションのアタッチインデックス
 	float m_AnimationTotalTime;	// 再生中のアニメーションの総時間
@@ -72,6 +118,8 @@ private:
 	VECTOR m_Scale;	// スケール
 	VECTOR m_Move;	// 移動量
 	VECTOR m_PrevPos; // 前回の座標
+	float m_PiScale; //πの大きさ
+	float m_TargetYawValue;//Y軸の目標回転値
 	CollisionAABB* m_AABB;	// AABBの当たり判定
 	CollisionOBB* m_AttackOBB; // OBBの攻撃当たり判定
 	CollisionSphere* m_SphereCollision;
@@ -81,6 +129,7 @@ private:
 	bool m_IsJumping; //ジャンプ中
 	bool m_IsFalling; //落下中
 	bool m_IsAttack; //攻撃中
+	bool m_IsAttackHit;
 
 	float m_CoyoteTime;          // コヨーテタイム残り時間
 	float m_CoyoteTimeMax;       // 最大コヨーテタイム
@@ -99,5 +148,15 @@ private:
 	float m_AirAttackFreezeTime;    // 静止残り時間
 	float m_AirAttackFreezeTimeMax; // 静止する時間の最大値
 	bool m_HasAirAttacked; // このジャンプ中にすでに空中攻撃したか
-
+	// ローリング
+	bool m_IsRolling;          // ローリング中か
+	float m_RollTime;          // 残り時間
+	float m_RollTimeMax;       // 最大時間
+	VECTOR m_RollDir;          // ローリング方向
+	//fall
+	float m_FallAnimDelay;
+	float m_FallAnimDelayMax;
+	//無敵時間
+	bool m_IsInvincible;
+	float m_InvincibleTime;
 };

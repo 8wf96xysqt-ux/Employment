@@ -19,4 +19,7 @@ private:
 
 	// 自動回転中か
 	bool m_AutoRotate = false;
+
+	// カメラとプレイヤーの距離
+	float m_CameraDistance = -3.0f;
 };

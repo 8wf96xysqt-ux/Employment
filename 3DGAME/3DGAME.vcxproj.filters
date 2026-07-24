@@ -49,6 +49,9 @@
     <Filter Include="Source\StageObject\Slope">
       <UniqueIdentifier>{247e8846-d063-46c7-8b98-d28449767aa8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\State">
+      <UniqueIdentifier>{e9912ef2-ba7b-4be6-adb3-94ed139110fd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Main.cpp">
@@ -134,6 +137,21 @@
     </ClCompile>
     <ClCompile Include="Source\Camera\FollowCameraStrategy.cpp">
       <Filter>Source\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\State\PlayerStateAttack.cpp">
+      <Filter>Source\State</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\State\PlayerStateIdle.cpp">
+      <Filter>Source\State</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\State\PlayerStateJump.cpp">
+      <Filter>Source\State</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\State\PlayerStateMove.cpp">
+      <Filter>Source\State</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\State\PlayerStateRoll.cpp">
+      <Filter>Source\State</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -241,6 +259,24 @@
     </ClInclude>
     <ClInclude Include="Source\Camera\FollowCameraStrategy.h">
       <Filter>Source\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\State\PlayerStateAttack.h">
+      <Filter>Source\State</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\State\PlayerStateBase.h">
+      <Filter>Source\State</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\State\PlayerStateIdle.h">
+      <Filter>Source\State</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\State\PlayerStateJump.h">
+      <Filter>Source\State</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\State\PlayerStateRoll.h">
+      <Filter>Source\State</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\State\PlayerStateMove.h">
+      <Filter>Source\State</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

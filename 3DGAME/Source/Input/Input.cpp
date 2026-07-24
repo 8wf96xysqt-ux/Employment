@@ -2,8 +2,8 @@
 #include "Input.h"
 #include <cmath>
 
-uint32_t g_InputState = 0;
-uint32_t g_PrevInputState = 0;
+uint64_t g_InputState = 0;
+uint64_t g_PrevInputState = 0;
 float g_StickLX = 0.0f;
 float g_StickLY = 0.0f;
 float g_StickRX = 0.0f;
@@ -170,6 +170,12 @@ namespace Input
     {
         return IsTriggerKey(KEY_1) ||
             IsTriggerKey(KEY_PAD_START);
+    }
+    //‰ñ”ğ
+    bool IsRolling()
+    {
+        return IsTriggerKey(KEY_SPACE) ||
+            IsTriggerKey(KEY_PAD_B);
     }
     //ƒJƒƒ‰ãˆÚ“®
     bool IsCameraUp()
