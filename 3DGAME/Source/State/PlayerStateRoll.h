@@ -1,16 +1,26 @@
 #pragma once
+#include "DxLib.h"
 #include "PlayerStateBase.h"
+
+struct PlayerData;
 
 class PlayerStateRoll : public PlayerStateBase
 {
 public:
-	PlayerStateRoll() {};
-	~PlayerStateRoll() {};
+    PlayerStateRoll();
+    ~PlayerStateRoll();
 
-	virtual void Enter(Player* player)override;
+    void Enter(Player* player) override;
+    void Update() override;
+    void Exit() override;
 
-	virtual void Update()override;
+    bool IsGroundState() const override { return true; }
 
-	virtual void Exit()override;
+    PlayerStateType GetStateType() const override {return PlayerStateType::ROLL;}
 
+private:
+    float m_RollTime;
+    float m_RollTimeMax;
+    VECTOR m_RollDir;
+    const PlayerData* m_PlayerData;
 };

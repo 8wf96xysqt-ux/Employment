@@ -46,11 +46,26 @@
     <Filter Include="Source\StageObject\Floor">
       <UniqueIdentifier>{08539fe7-185a-4974-b452-acf8dea98367}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\StageObject\Slope">
-      <UniqueIdentifier>{247e8846-d063-46c7-8b98-d28449767aa8}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\State">
       <UniqueIdentifier>{e9912ef2-ba7b-4be6-adb3-94ed139110fd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Animation">
+      <UniqueIdentifier>{5bd7715c-0fe4-4380-aa80-70b847b89cb3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\MyEffekseer">
+      <UniqueIdentifier>{d0125353-8708-40b5-b1eb-db5342359705}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\ParameterData">
+      <UniqueIdentifier>{cbbb4fee-adce-48c5-b04e-badfb2a8df80}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\ShadowMap">
+      <UniqueIdentifier>{3d2d3895-72f8-44ab-995b-2a8f73241447}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Physics">
+      <UniqueIdentifier>{23a8f856-8064-47ba-9ff4-ebbbbdb44925}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\ObjectPool">
+      <UniqueIdentifier>{3ac8e57b-d133-4481-a951-f87c8f6ad4aa}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -117,12 +132,6 @@
     <ClCompile Include="Source\StageObject\Block\Block.cpp">
       <Filter>Source\StageObject\Block</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Collision\CollisionSlope.cpp">
-      <Filter>Source\Collision</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\StageObject\Slope\Slope.cpp">
-      <Filter>Source\StageObject\Slope</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Collision\CollisionOBB.cpp">
       <Filter>Source\Collision</Filter>
     </ClCompile>
@@ -138,9 +147,6 @@
     <ClCompile Include="Source\Camera\FollowCameraStrategy.cpp">
       <Filter>Source\Camera</Filter>
     </ClCompile>
-    <ClCompile Include="Source\State\PlayerStateAttack.cpp">
-      <Filter>Source\State</Filter>
-    </ClCompile>
     <ClCompile Include="Source\State\PlayerStateIdle.cpp">
       <Filter>Source\State</Filter>
     </ClCompile>
@@ -152,6 +158,45 @@
     </ClCompile>
     <ClCompile Include="Source\State\PlayerStateRoll.cpp">
       <Filter>Source\State</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\State\PlayerStateBase.cpp">
+      <Filter>Source\State</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\State\PlayerStateAirAttack.cpp">
+      <Filter>Source\State</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\State\PlayerStateGroundAttack.cpp">
+      <Filter>Source\State</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\State\PlayerStateFall.cpp">
+      <Filter>Source\State</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\State\PlayerStateHover.cpp">
+      <Filter>Source\State</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\State\PlayerStateDashAttack.cpp">
+      <Filter>Source\State</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Animation\AnimationController.cpp">
+      <Filter>Source\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MyEffekseer\Effekseer.cpp">
+      <Filter>Source\MyEffekseer</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MyEffekseer\EffekseerManager.cpp">
+      <Filter>Source\MyEffekseer</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ParameterData\AttackDataManager.cpp">
+      <Filter>Source\ParameterData</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ParameterData\PlayerDataManager.cpp">
+      <Filter>Source\ParameterData</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ShadowMap\ShadowMap.cpp">
+      <Filter>Source\ShadowMap</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Physics\Gravity.cpp">
+      <Filter>Source\Physics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -233,15 +278,6 @@
     <ClInclude Include="Source\StageObject\Block\BlockParameter.h">
       <Filter>Source\StageObject\Block</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Collision\CollisionSlope.h">
-      <Filter>Source\Collision</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\StageObject\Slope\Slope.h">
-      <Filter>Source\StageObject\Slope</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\StageObject\Slope\SlopeParameter.h">
-      <Filter>Source\StageObject\Slope</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Collision\CollisionOBB.h">
       <Filter>Source\Collision</Filter>
     </ClInclude>
@@ -260,9 +296,6 @@
     <ClInclude Include="Source\Camera\FollowCameraStrategy.h">
       <Filter>Source\Camera</Filter>
     </ClInclude>
-    <ClInclude Include="Source\State\PlayerStateAttack.h">
-      <Filter>Source\State</Filter>
-    </ClInclude>
     <ClInclude Include="Source\State\PlayerStateBase.h">
       <Filter>Source\State</Filter>
     </ClInclude>
@@ -277,6 +310,54 @@
     </ClInclude>
     <ClInclude Include="Source\State\PlayerStateMove.h">
       <Filter>Source\State</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\State\PlayerStateAirAttack.h">
+      <Filter>Source\State</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\State\PlayerStateGroundAttack.h">
+      <Filter>Source\State</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\State\PlayerStateFall.h">
+      <Filter>Source\State</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\State\PlayerStateHover.h">
+      <Filter>Source\State</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\State\PlayerStateDashAttack.h">
+      <Filter>Source\State</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Animation\AnimationController.h">
+      <Filter>Source\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MyEffekseer\Effekseer.h">
+      <Filter>Source\MyEffekseer</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MyEffekseer\EffekseerManager.h">
+      <Filter>Source\MyEffekseer</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GameSetting\Color.h">
+      <Filter>Source\GameSetting</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ParameterData\AttackDataManager.h">
+      <Filter>Source\ParameterData</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ParameterData\AttackParameter.h">
+      <Filter>Source\ParameterData</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ParameterData\PlayerParameter.h">
+      <Filter>Source\ParameterData</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ParameterData\PlayerDataManager.h">
+      <Filter>Source\ParameterData</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ShadowMap\ShadowMap.h">
+      <Filter>Source\ShadowMap</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Physics\Gravity.h">
+      <Filter>Source\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ObjectPool\ObjectPool.h">
+      <Filter>Source\ObjectPool</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

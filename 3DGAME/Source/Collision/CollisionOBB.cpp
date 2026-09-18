@@ -4,11 +4,13 @@
 
 // コンストラクタ
 CollisionOBB::CollisionOBB()
+
+    :m_TargetPos(nullptr)
+    , m_LocalPos(VGet(0, 0, 0))
+    , m_Size(VGet(0, 0, 0))
+    , m_RotY(0.0f)
+    , m_IsActive(false)
 {
-    m_TargetPos = nullptr;
-    m_LocalPos = VGet(0, 0, 0);
-    m_Size = VGet(0, 0, 0);
-    m_RotY = 0.0f;
 }
 
 // デストラクタ
@@ -21,6 +23,9 @@ CollisionOBB::~CollisionOBB()
 void CollisionOBB::Draw()
 {
 #ifdef _DEBUG
+
+    if (!m_IsActive)
+        return;
 
     VECTOR center = MyMath::VecAdd(*m_TargetPos, m_LocalPos);
 
@@ -69,11 +74,7 @@ void CollisionOBB::Draw()
 
     for (int i = 0; i < 12; i++)
     {
-        DrawLine3D(
-            vertex[line[i][0]],
-            vertex[line[i][1]],
-            GetColor(255, 255, 0)
-        );
+        DrawLine3D(vertex[line[i][0]], vertex[line[i][1]], GetColor(255, 255, 0));
     }
 
 #endif
@@ -82,11 +83,11 @@ void CollisionOBB::Draw()
 // OBB同士の判定
 bool CollisionOBB::CheckOBB(const CollisionOBB* other) const
 {
+    if (!m_IsActive || !other->IsActive())
+        return false;
 
     VECTOR posA = MyMath::VecAdd(*m_TargetPos, m_LocalPos);
-    VECTOR posB = MyMath::VecAdd(other->GetTargetPos(),
-        other->GetLocalPos());
-
+    VECTOR posB = MyMath::VecAdd(other->GetTargetPos(), other->GetLocalPos());
 
     // X方向ベクトル
     VECTOR axisA[2];
@@ -97,18 +98,13 @@ bool CollisionOBB::CheckOBB(const CollisionOBB* other) const
 
     VECTOR axisB[2];
 
-    axisB[0] = VGet(cosf(other->GetRotation()),
-        0,
-        sinf(other->GetRotation()));
+    axisB[0] = VGet(cosf(other->GetRotation()), 0, sinf(other->GetRotation()));
 
-    axisB[1] = VGet(-sinf(other->GetRotation()),
-        0,
-        cosf(other->GetRotation()));
+    axisB[1] = VGet(-sinf(other->GetRotation()), 0, cosf(other->GetRotation()));
 
 
     // 中心距離
-    VECTOR distance =
-        MyMath::VecSub(posB, posA);
+    VECTOR distance = MyMath::VecSub(posB, posA);
 
 
 
@@ -126,9 +122,7 @@ bool CollisionOBB::CheckOBB(const CollisionOBB* other) const
         VECTOR axis = axes[i];
 
 
-        float len =
-            sqrtf(axis.x * axis.x +
-                axis.z * axis.z);
+        float len = sqrtf(axis.x * axis.x + axis.z * axis.z);
 
 
         axis.x /= len;
@@ -136,32 +130,16 @@ bool CollisionOBB::CheckOBB(const CollisionOBB* other) const
 
 
         // 中心間距離を軸に投影
-        float distanceProjection =
-            fabsf(distance.x * axis.x +
-                distance.z * axis.z);
+        float distanceProjection = fabsf(distance.x * axis.x + distance.z * axis.z);
 
 
 
         // 自分側の幅
-        float a =
-            fabsf(m_Size.x * 0.5f *
-                (axisA[0].x * axis.x +
-                    axisA[0].z * axis.z))
-            +
-            fabsf(m_Size.z * 0.5f *
-                (axisA[1].x * axis.x +
-                    axisA[1].z * axis.z));
+        float a = fabsf(m_Size.x * 0.5f * (axisA[0].x * axis.x + axisA[0].z * axis.z)) + fabsf(m_Size.z * 0.5f * (axisA[1].x * axis.x + axisA[1].z * axis.z));
 
 
         // 相手側の幅
-        float b =
-            fabsf(other->GetSize().x * 0.5f *
-                (axisB[0].x * axis.x +
-                    axisB[0].z * axis.z))
-            +
-            fabsf(other->GetSize().z * 0.5f *
-                (axisB[1].x * axis.x +
-                    axisB[1].z * axis.z));
+        float b = fabsf(other->GetSize().x * 0.5f * (axisB[0].x * axis.x + axisB[0].z * axis.z)) + fabsf(other->GetSize().z * 0.5f * (axisB[1].x * axis.x + axisB[1].z * axis.z));
 
 
         // 軸上で離れている
@@ -173,18 +151,14 @@ bool CollisionOBB::CheckOBB(const CollisionOBB* other) const
 
 
     // Y方向はAABBと同じ
-    float topA =
-        posA.y + m_Size.y * 0.5f;
+    float topA = posA.y + m_Size.y * 0.5f;
 
-    float bottomA =
-        posA.y - m_Size.y * 0.5f;
+    float bottomA = posA.y - m_Size.y * 0.5f;
 
 
-    float topB =
-        posB.y + other->GetSize().y * 0.5f;
+    float topB = posB.y + other->GetSize().y * 0.5f;
 
-    float bottomB =
-        posB.y - other->GetSize().y * 0.5f;
+    float bottomB = posB.y - other->GetSize().y * 0.5f;
 
 
     if (bottomA > topB ||

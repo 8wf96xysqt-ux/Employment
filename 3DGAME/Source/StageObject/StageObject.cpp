@@ -1,14 +1,14 @@
 #include "StageObject.h"
 
-#define ALPHA_EASE_SPEED 0.2f
+constexpr float ALPHA_EASE_SPEED = 0.2f;
 
 StageObject::StageObject()
+	: m_Handle(-1)
+	, m_Pos({})
+	, m_Rot({})
+	, m_Scale({})
+	, m_AABB(nullptr)
 {
-	m_Handle = -1;
-	m_Pos = {};
-	m_Rot = {};
-	m_Scale = {};
-	m_AABB = nullptr;
 }
 StageObject::~StageObject()
 {

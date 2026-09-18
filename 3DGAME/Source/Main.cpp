@@ -3,15 +3,22 @@
 #include "Scene/SceneManager.h"
 #include "Input/Input.h"
 #include "FPS/FPS.h"
+#include <windows.h>
+
 
 
 
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_  HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nShowCmd)
 {
-	ChangeWindowMode(true);
-	SetMainWindowText("Project Bot");
+	int width = GetPrivateProfileIntA("Display", "Width", SCREEN_WIDTH, ".\\Data\\Launcher\\config.ini");
+	int height = GetPrivateProfileIntA("Display", "Height", SCREEN_HEIGHT, ".\\Data\\Launcher\\config.ini");
+	int fullscreen = GetPrivateProfileIntA("Display", "Fullscreen", 0, ".\\Data\\Launcher\\config.ini");
 
-	SetGraphMode(SCREEN_WIDTH, SCREEN_HEIGHT, 32);
+
+	ChangeWindowMode(fullscreen == 0);
+	SetMainWindowText("Project Bot");
+	SetGraphMode(width, height, 32);
+
 
 
 	if (DxLib_Init() == -1)
@@ -44,16 +51,17 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_  HINSTANCE hPrevInstance, 
 		// 入力更新
 		Input::Update();
 
+		// FPS更新
+		FPSSystem::Update();
+		
 		// シーンを更新
 		sceneManager->Update();
 
-		// 入力描画
-		Input::Draw();
-
-		// FPS更新
-		FPSSystem::Update();
 		// FPS描画
 		FPSSystem::Draw();
+
+		// 入力描画
+		Input::Draw();
 
 		if (CheckHitKey(KEY_INPUT_ESCAPE)) break;
 

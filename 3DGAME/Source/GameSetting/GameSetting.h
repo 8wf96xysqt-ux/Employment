@@ -1,4 +1,5 @@
 #pragma once
 
-#define SCREEN_WIDTH 1600
-#define SCREEN_HEIGHT 900
+// âÊñ ÉTÉCÉY
+constexpr int SCREEN_WIDTH = 1600;
+constexpr int SCREEN_HEIGHT = 900;

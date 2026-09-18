@@ -3,8 +3,6 @@
 #include "Floor/FloorParameter.h"
 #include "Block/Block.h"
 #include "Block/BlockParameter.h"
-#include "Slope/SlopeParameter.h"
-#include "Slope/Slope.h"
 #include "../Library/json/json.hpp"
 
 using json = nlohmann::json;
@@ -12,11 +10,10 @@ using json = nlohmann::json;
 StageObjectManager* StageObjectManager::m_Instance = nullptr;
 
 StageObjectManager::StageObjectManager()
+	: m_StageObjects({})
+	, m_OriginalFloors(nullptr)
+	, m_OriginalBlocks(nullptr)
 {
-	m_StageObjects = {};
-	m_OriginalFloors = nullptr;
-	m_OriginalBlocks = nullptr;
-	m_OriginalSlopes = nullptr;
 }
 
 StageObjectManager::~StageObjectManager()
@@ -29,7 +26,6 @@ void StageObjectManager::Init()
 	// 複製元となるクラスを生成
 	m_OriginalFloors = new Floor[FLOOR_MAX];
 	m_OriginalBlocks = new Block[BLOCK_MAX];
-	m_OriginalSlopes = new Slope[SLOPE_MAX];
 }
 
 /// <summary>
@@ -41,10 +37,9 @@ void StageObjectManager::Load()
 	m_OriginalFloors[FLOOR_00].Load("Data/Floor/Floor.x");
 
 	// ブロックをロード
+	//影表示されないのはブロック側に問題ありfloorに変えると影が表示される
 	m_OriginalBlocks[BLOCK_00].Load("Data/Block/Block.x");
 
-	//スロープをロード
-	m_OriginalSlopes[SLOPE_00].Load("Data/Slope/Slope2.x");
 }
 
 void StageObjectManager::Start()
@@ -75,7 +70,6 @@ void StageObjectManager::Fin()
 {
 	delete[] m_OriginalFloors;
 	delete[] m_OriginalBlocks;
-	delete[] m_OriginalSlopes;
 }
 
 Floor* StageObjectManager::CreateFloor(int id)
@@ -124,24 +118,5 @@ Block* StageObjectManager::CreateBlock(int id, VECTOR pos, VECTOR rot, VECTOR sc
 	return block;
 }
 
-Slope* StageObjectManager::CreateSlope(int id)
-{
-	//IDチェック
-	if (id < 0 || id > SLOPE_MAX) return nullptr;
 
-	//オリジナルから複製して生成
-	StageObject* slope = m_OriginalSlopes[id].Clone();
 
-	//リストに追加
-	m_StageObjects.push_back(slope);
-
-	return static_cast<Slope*>(slope);
-}
-
-Slope* StageObjectManager::CreateSlope(int id, VECTOR pos, VECTOR rot, VECTOR scale)
-{
-	Slope* slope = CreateSlope(id);
-	slope->SetTransform(pos, rot, scale);
-
-	return slope;
-}

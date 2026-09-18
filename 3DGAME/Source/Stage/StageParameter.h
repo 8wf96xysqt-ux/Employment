@@ -21,8 +21,6 @@ enum LcateObjectID
 	FLOOR_00,
 	//Block
 	BLOCK_00,
-	//Slope
-	SLOPE_00,
 };
 
 //json‚É‚ ‚éTransform‚ðDxLib‚ÌVECTOR‚É•ÏŠ·

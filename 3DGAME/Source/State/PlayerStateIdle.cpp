@@ -1,74 +1,72 @@
 #include "DxLib.h"
-
 #include "../Player/Player.h"
 #include "PlayerStateIdle.h"
+#include "PlayerStateGroundAttack.h"
 #include "PlayerStateMove.h"
-#include "PlayerStateAttack.h"
 #include "PlayerStateJump.h"
 #include "PlayerStateRoll.h"
+#include "PlayerStateFall.h"
 #include "../Input/Input.h"
+#include "../ParameterData/PlayerDataManager.h"
 
+PlayerStateIdle::PlayerStateIdle()
+    :m_PlayerData(nullptr)
+{
+}
 
 void PlayerStateIdle::Enter(Player* player)
 {
     m_pPlayer = player;
-
-    // 初期状態は自分を保持
     m_pNextState = this;
-
-
-    // 待機アニメーション
-    m_pPlayer->PlayAnimation(PLAYER_ANIMATION_IDLE,true);
+    m_PlayerData = PlayerDataManager::GetInstance()->GetParameter();
+    //待機アニメーション
+    m_pPlayer->PlayAnimation(PLAYER_ANIMATION_IDLE,true,m_PlayerData->animSpeedIdle);
 }
-
 
 void PlayerStateIdle::Update()
 {
-    
-    //移動入力
-    if (Input::GetStickLX() != 0 ||
-        Input::GetStickLY() != 0 ||
-        Input::IsInputKey(Input::KEY_W) ||
-        Input::IsInputKey(Input::KEY_A) ||
-        Input::IsInputKey(Input::KEY_S) ||
-        Input::IsInputKey(Input::KEY_D))
+    //バッファーとコヨーテタイム
+    if (m_pPlayer->IsJumpBuffered())
     {
-        ChangeState(new PlayerStateMove());
+        if (m_pPlayer->IsGround() || m_pPlayer->GetCoyoteTime() > 0.0f)
+        {
+            m_pPlayer->ResetJumpBuffer();
 
-        return;
+            ChangeState(new PlayerStateJump());
+
+            return;
+        }
     }
 
+    VECTOR move = m_pPlayer->GetMove();
 
-    //攻撃
+    move.x = 0.0f;
+    move.z = 0.0f;
+
+    m_pPlayer->SetMove(move);
+
+    // 攻撃
     if (Input::IsAttack())
     {
-        ChangeState(new PlayerStateAttack());
-
+        ChangeState(new PlayerStateGroundAttack());
         return;
     }
 
-
-    
-    //ジャンプ
-    if (Input::IsTriggerJump())
-    {
-        ChangeState(new PlayerStateJump());
-
-        return;
-    }
-
-
-    //ロール
-    if (Input::IsTriggerKey(Input::KEY_PAD_B))
+    // ロール
+    if (Input::IsRolling())
     {
         ChangeState(new PlayerStateRoll());
+        return;
+    }
 
+    // 移動
+    if (Input::IsMove())
+    {
+        ChangeState(new PlayerStateMove());
         return;
     }
 }
 
-
 void PlayerStateIdle::Exit()
 {
-
 }

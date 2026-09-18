@@ -2,8 +2,6 @@
 #include "../../Collision/CollisionManager.h"
 #include "../../Collision/CollisionAABB.h"
 
-#define DEFAULT_POS VGet(0.0f, 0.0f, 0.0f)
-
 void Floor::Start()
 {
 	m_AABB = CollisionManager::GetInstance()->CreateAABB();

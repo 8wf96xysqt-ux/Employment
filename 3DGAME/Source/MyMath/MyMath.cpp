@@ -87,8 +87,8 @@ namespace MyMath
 		VECTOR result;
 
 		result.x = vecA.y * vecB.z - vecA.z * vecB.y;
-		result.y = vecA.x * vecB.z - vecA.z * vecB.x;
-		result.z = vecA.y * vecB.x - vecA.x * vecB.y;
+		result.y = vecA.z * vecB.x - vecA.x * vecB.z; 
+		result.z = vecA.x * vecB.y - vecA.y * vecB.x; 
 
 		return result;
 	}

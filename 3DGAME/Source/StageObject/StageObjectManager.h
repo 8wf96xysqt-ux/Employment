@@ -5,7 +5,6 @@
 class StageObject;
 class Floor;
 class Block;
-class Slope;
 
 // プレイヤーオブジェクト管理クラス
 class StageObjectManager
@@ -33,9 +32,7 @@ public:
 	Block* CreateBlock(int id);
 	Block* CreateBlock(int id, VECTOR pos, VECTOR rot, VECTOR scale);
 
-	//Slopeを生成する
-	Slope* CreateSlope(int id);
-	Slope* CreateSlope(int id, VECTOR pos, VECTOR rot, VECTOR scale);
+	
 
 	// 管理中のプレイヤーを取得する
 	std::vector<StageObject*> GetStageObjects() { return m_StageObjects; }
@@ -45,5 +42,4 @@ private:
 	std::vector<StageObject*> m_StageObjects;
 	Floor* m_OriginalFloors;
 	Block* m_OriginalBlocks;
-	Slope* m_OriginalSlopes;
 };

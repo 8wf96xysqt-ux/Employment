@@ -59,11 +59,7 @@ void StageManager::Start()
             int id = obj.id - BLOCK_00;
             StageObjectManager::GetInstance()->CreateBlock(id, obj.pos, obj.rot, obj.scale);
         }
-        else if (obj.id <= SLOPE_00)
-        {
-            int id = obj.id - SLOPE_00;
-            StageObjectManager::GetInstance()->CreateSlope(id, obj.pos, obj.rot, obj.scale);
-        }
+      
     }
 
 }
