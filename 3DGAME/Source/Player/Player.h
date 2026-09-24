@@ -1,162 +1,128 @@
 #pragma once
 #include "DxLib.h"
 #include <vector>
+#include "../GameSetting/GameSetting.h"
+#include "../Animation/AnimationController.h"
+#include "../FPS/FPS.h"
+#include "../Character/CharacterBase.h"
+
 class CollisionAABB;
-class CollisionSphere;
 class CollisionOBB;
 class StageObject;
 class PlayerStateBase;
+struct AttackData;
+struct PlayerData;
 
-enum PlayerAnimationType
-{
-	PLAYER_ANIMATION_LANDING,
-	PLAYER_ANIMATION_DIE,
-	PLAYER_ANIMATION_FALLING,
-	PLAYER_ANIMATION_AIRCOMBO1,
-	PLAYER_ANIMATION_AIRCOMBO2,
-	PLAYER_ANIMATION_DASHCOMBO1,
-	PLAYER_ANIMATION_DASHCOMBO2,
-	PLAYER_ANIMATION_DASHJUMP,
-	PLAYER_ANIMATION_GDCOMBO1,
-	PLAYER_ANIMATION_GDCOMBO2,
-	PLAYER_ANIMATION_IDLE,
-	PLAYER_ANIMATION_JUMP,
-	PLAYER_ANIMATION_RUN,
-	PLAYER_ANIMATION_WALK,
-	PLAYER_ANIMATION_ROLLING,
-};
-
-enum class ComboType
-{
-	COMBO_NONE,
-	COMBO_GROUND,
-	COMBO_AIR,
-	COMBO_DASH,
-	
-};
-
-class Player
+class Player : public CharacterBase
 {
 public:
-	Player();
-	~Player();
-public:
-	void Init();	// 初期化
-	void Load();	// ロード
-	void Start();	// 開始
-	void Step();	// ステップ
-	void Update();	// 更新
-	void Draw();	// 描画
-	void Fin();		// 終了
-private:
-	void UpdateAttackOBB();
-private:
-	float RotCap(float rot);
-	void DirectionRot();		// 方向回転
-private:
-	void UpdateMove();
-	void UpdateJump();
-	void UpdateGravity();
-	void UpdateAttack();
-	void UpdateRolling();
-	void UpdateInvincible();
-public:
-	VECTOR GetPos() { return m_Pos; }
-	VECTOR GetRot() const { return m_Rot; }
-	CollisionAABB* GetAABB() { return m_AABB; }
-	CollisionSphere* GetSphereCollision() { return m_SphereCollision; }
-	CollisionOBB* GetAttackOBB() { return m_AttackOBB; }
-	bool IsInvincible() const { return m_IsInvincible; }
-	// State用
-	VECTOR GetMove()
-	{
-		return m_Move;
-	}
-	void SetMove(VECTOR move)
-	{
-		m_Move = move;
-	}
-	bool GetIsGround()
-	{
-		return m_IsGround;
-	}
-	bool GetIsRolling()
-	{
-		return m_IsRolling;
-	}
-	void SetTargetYaw(float yaw)
-	{
-		m_TargetYawValue = yaw;
-	}
-	void StateDirectionRot()
-	{
-		DirectionRot();
-	}
-	void StatePlayAnimation(PlayerAnimationType anim, bool loop)
-	{
-		PlayAnimation(anim, loop);
-	}
+    Player();
+    ~Player();
 
-public:
-	void PlayAnimation(PlayerAnimationType anim, bool isLoop);
+    void Init();
+    void Load();
+    void Start();
+    void Step();
+    void Update();
+    void Draw();
+    void DrawDebug();
+    void Fin();
+
+    const char* GetStateTypeName() const;
+
+    float RotCap(float rot);
+    bool UpdateMove(float speed);
+    void DirectionRot();
+    float GetGroundY() const { return m_LastGroundY; }
+
+    // State用
+    VECTOR GetMove() const { return m_Move; }
+    void SetMove(VECTOR move) { m_Move = move; }
+    void SetTargetYaw(float yaw) { m_TargetYawValue = yaw; }
+    bool IsGround() const { return m_IsGround; }
+    void SetGround(bool value) { m_IsGround = value; }
+    bool HasHovered() const { return m_HasHovered; }
+    void SetHasHovered(bool value) { m_HasHovered = value; }
+
+    // 攻撃State用
+    void StartAttack() { m_IsAttack = true; }
+    void EndAttack() { m_IsAttack = false; }
+    void SetAttackData(const AttackData* data) { m_AttackData = data; }
+    bool HasAirAttacked() const { return m_HasAirAttacked; }
+    void SetHasAirAttacked(bool value) { m_HasAirAttacked = value; }
+
+    // コヨーテタイム
+    float GetCoyoteTime() const { return m_CoyoteTime; }
+
+    // ジャンプバッファ
+    void SetJumpBuffer() { m_JumpBufferTime = m_JumpBufferTimeMax; }
+    bool IsJumpBuffered() const { return m_JumpBufferTime > 0.0f; }
+    void ResetJumpBuffer() { m_JumpBufferTime = 0.0f; }
+    void UpdateJumpBuffer()
+    {
+        if (m_JumpBufferTime > 0.0f)
+        {
+            m_JumpBufferTime -= FPSSystem::GetDeltaTime();
+        }
+    }
+
+    // アニメーション
+    float GetAnimationNowTime() const { return m_Animation.GetNowTime(); }
+    float GetAnimationTotalTime() const { return m_Animation.GetTotalTime(); }
+
+    void PlayAnimation(PlayerAnimationType anim, bool isLoop, float speed)
+    {
+        m_Animation.Play(anim, isLoop, speed);
+    }
+
+    // カメラ基準移動取得
+    VECTOR GetCameraMoveInput();
+
+    void CheckHitStageObjects(const std::vector<StageObject*>& objects);
 
 private:
-	void UpdateAnimation();
-    float GetAnimationSpeed(PlayerAnimationType anim) const; public:
-	void CheckHitStageObjects(const std::vector<StageObject*>objects);
-private:
-	PlayerStateBase* m_pState;
-	int m_Handle;	// 画像ハンドル
-	int m_AnimationAttachIndex;	// アニメーションのアタッチインデックス
-	float m_AnimationTotalTime;	// 再生中のアニメーションの総時間
-	float m_AnimationNowTime;	// 再生中のアニメーションの再生時間
-	bool m_IsLoopAnimation;		// アニメーションをループさせるか
-	float m_AnimationSpeed;     // 現在再生中のアニメーションの再生速度
-	PlayerAnimationType m_NowAnimation;	// 再生中のアニメーション
-	VECTOR m_Pos;	// 座標
-	VECTOR m_Rot;	// 回転
-	VECTOR m_Scale;	// スケール
-	VECTOR m_Move;	// 移動量
-	VECTOR m_PrevPos; // 前回の座標
-	float m_PiScale; //πの大きさ
-	float m_TargetYawValue;//Y軸の目標回転値
-	CollisionAABB* m_AABB;	// AABBの当たり判定
-	CollisionOBB* m_AttackOBB; // OBBの攻撃当たり判定
-	CollisionSphere* m_SphereCollision;
-	float m_VelY;       // Y方向速度
-	//判定
-	bool  m_IsGround;   // 地面にいるか
-	bool m_IsJumping; //ジャンプ中
-	bool m_IsFalling; //落下中
-	bool m_IsAttack; //攻撃中
-	bool m_IsAttackHit;
+    void UpdateAttackOBB();
 
-	float m_CoyoteTime;          // コヨーテタイム残り時間
-	float m_CoyoteTimeMax;       // 最大コヨーテタイム
-	float m_JumpBufferTime;      // 入力バッファ残り時間
-	float m_JumpBufferTimeMax;   // 最大入力バッファ時間
-	// 可変ジャンプ用
-	bool  m_JumpHold;        // ジャンプボタンを押しているか
-	float m_JumpHoldTime;    // 押し続けている時間
-	float m_JumpHoldMax;     // 最大ホールド時間
-	//コンボ用
-	int m_Combo;
-	bool m_AttackBuffer;
-	ComboType m_ComboType;
-	//攻撃
-	bool  m_IsAirAttackFreeze;      // 空中攻撃開始時の静止中フラグ
-	float m_AirAttackFreezeTime;    // 静止残り時間
-	float m_AirAttackFreezeTimeMax; // 静止する時間の最大値
-	bool m_HasAirAttacked; // このジャンプ中にすでに空中攻撃したか
-	// ローリング
-	bool m_IsRolling;          // ローリング中か
-	float m_RollTime;          // 残り時間
-	float m_RollTimeMax;       // 最大時間
-	VECTOR m_RollDir;          // ローリング方向
-	//fall
-	float m_FallAnimDelay;
-	float m_FallAnimDelayMax;
-	//無敵時間
-	bool m_IsInvincible;
-	float m_InvincibleTime;
+    // プレイヤーの状態を管理
+    PlayerStateBase* m_pState;
+
+    // プレイヤーのパラメータ
+    const PlayerData* m_PlayerData;
+
+    // モデルハンドル
+    int m_Handle;
+
+    VECTOR m_Scale;
+
+    // 移動速度
+    VECTOR m_Move;
+
+    float m_TargetYawValue;
+
+    // 衝突判定
+    CollisionAABB* m_AABB;
+    CollisionOBB* m_AttackOBB;
+
+    // 判定
+    bool m_IsGround;
+    bool m_IsAttack;
+    bool m_HasHovered;
+
+    // コヨーテタイム
+    float m_CoyoteTime;
+    float m_CoyoteTimeMax;
+
+    // ジャンプバッファ
+    float m_JumpBufferTime;
+    float m_JumpBufferTimeMax;
+
+    // 攻撃
+    bool m_HasAirAttacked;
+    const AttackData* m_AttackData;
+
+    float m_LastGroundY;
+
+    // アニメーション
+    AnimationController m_Animation;
 };
+

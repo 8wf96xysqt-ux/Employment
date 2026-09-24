@@ -2,7 +2,6 @@
 //前方定義
 class CollisionAABB;
 class CollisionSphere;
-class CollisionSlope;
 class CollisionOBB;
 
 #define COLLISION_MAX 10000
@@ -35,10 +34,6 @@ public:
 	CollisionSphere* CreateSphere();
 	// Sphereを削除する
 	void DeleteSphere(CollisionSphere* targetSphere);
-	//Slopeを生成
-	CollisionSlope* CreateSlope();
-	//Slopeを削除
-	void DeleteSlope(CollisionSlope* targetSlope);
 	//OBBを作成
 	CollisionOBB* CreateOBB();
 	//OBBを削除
@@ -54,7 +49,6 @@ private:
 	// 当たり判定管理用配列
 	CollisionAABB* m_AABB[COLLISION_MAX];
 	CollisionSphere* m_Sphere[COLLISION_MAX];
-	CollisionSlope* m_Slope[COLLISION_MAX];
 	CollisionOBB* m_OBB[COLLISION_MAX];
 	
 };

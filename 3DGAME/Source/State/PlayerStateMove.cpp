@@ -1,126 +1,76 @@
+#include "PlayerStateIdle.h"
 #include "PlayerStateMove.h"
-
+#include "PlayerStateJump.h"
+#include "PlayerStateDashAttack.h"
+#include "PlayerStateRoll.h"
 #include "../Player/Player.h"
 #include "../Input/Input.h"
-#include "../Camera/CameraManager.h"
 #include "../MyMath/MyMath.h"
+#include "../ParameterData/PlayerDataManager.h"
 
 
+PlayerStateMove::PlayerStateMove()
+    : m_PlayerData(nullptr)
+{
+}
 void PlayerStateMove::Enter(Player* player)
 {
     m_pPlayer = player;
-    m_pNextState = nullptr;
-}
+    m_pNextState = this;
 
+    m_PlayerData = PlayerDataManager::GetInstance()->GetParameter();
+
+}
 
 void PlayerStateMove::Update()
 {
-
     Player* player = m_pPlayer;
 
-
-    float camYaw =
-        CameraManager::GetInstance()
-        ->GetCamera()
-        ->GetYaw();
-
-
-    VECTOR camForward =
-        MyMath::VecForwardZX(camYaw);
-
-
-    VECTOR camRight;
-
-    camRight.x = camForward.z;
-    camRight.y = 0.0f;
-    camRight.z = -camForward.x;
-
-
-    VECTOR move = VGet(0, 0, 0);
-
-
-    float lx = Input::GetStickLX();
-    float ly = -Input::GetStickLY();
-
-
-
-    if (Input::IsInputKey(Input::KEY_A))
-        lx -= 1.0f;
-
-    if (Input::IsInputKey(Input::KEY_D))
-        lx += 1.0f;
-
-    if (Input::IsInputKey(Input::KEY_W))
-        ly += 1.0f;
-
-    if (Input::IsInputKey(Input::KEY_S))
-        ly -= 1.0f;
-
-
-
-    move =
-        MyMath::VecAdd(
-            move,
-            MyMath::VecScale(camRight, lx)
-        );
-
-
-    move =
-        MyMath::VecAdd(
-            move,
-            MyMath::VecScale(camForward, ly)
-        );
-
-
-    float length =
-        MyMath::VecLong(move);
-
-
-
-    if (length > 0.02f)
+    // ジャンプ
+    if (player->IsJumpBuffered() && (player->IsGround() || player->GetCoyoteTime() > 0.0f))
     {
+        player->ResetJumpBuffer();
 
-        move =
-            MyMath::VecNormalize(move);
+        ChangeState(new PlayerStateJump());
+        return;
+    }
 
+    // 攻撃
+    if (Input::IsAttack())
+    {
+        ChangeState(new PlayerStateDashAttack());
+        return;
+    }
 
-        player->SetMove(
-            VGet(
-                move.x * 0.08f,
-                player->GetMove().y,
-                move.z * 0.08f
-            )
-        );
+    // ロール
+    if (Input::IsRolling())
+    {
+        ChangeState(new PlayerStateRoll());
+        return;
+    }
 
+    // 移動
+    if (!player->UpdateMove(m_PlayerData->moveSpeed))
+    {
+        ChangeState(new PlayerStateIdle());
+        return;
+    }
 
-        player->SetTargetYaw(
-            atan2f(move.x, move.z)
-        );
+    // アニメーション
+    float lx = Input::GetStickLX();
+    float ly = Input::GetStickLY();
 
+    float power = sqrtf(lx * lx + ly * ly);
 
-        player->DirectionRot();
-
+    if (power < m_PlayerData->runInputThreshold)
+    {
+        player->PlayAnimation(PLAYER_ANIMATION_WALK,true,m_PlayerData->animSpeedWalk);
     }
     else
     {
-        player->SetMove(
-            VGet(
-                0,
-                player->GetMove().y,
-                0
-            )
-        );
-
-
-        // 入力がなくなったらIdleへ
-        m_pNextState = new PlayerStateIdle();
-
+        player->PlayAnimation(PLAYER_ANIMATION_RUN,true,m_PlayerData->animSpeedRun);
     }
-
 }
-
-
 void PlayerStateMove::Exit()
 {
-
 }

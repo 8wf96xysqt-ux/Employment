@@ -6,9 +6,10 @@ CameraManager* CameraManager::m_Instance = nullptr;
 
 // コンストラクタ
 CameraManager::CameraManager()
-{
+
 	// 生成されていなければnullptr
-	m_Camera = nullptr;
+	:m_Camera(nullptr)
+{
 }
 
 // デストラクタ

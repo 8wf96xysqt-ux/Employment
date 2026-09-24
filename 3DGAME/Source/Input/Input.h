@@ -4,6 +4,7 @@
 
 namespace Input
 {
+    // 物理入力
     enum InputKey : uint64_t
     {
         // キーボード
@@ -28,7 +29,6 @@ namespace Input
         KEY_L_SHIFT = (1ull << 15),
         KEY_L_CTRL = (1ull << 16),
 
-
         // ゲームパッド
         KEY_PAD_UP = (1ull << 17),
         KEY_PAD_DOWN = (1ull << 18),
@@ -52,40 +52,47 @@ namespace Input
         KEY_PAD_R_PUSH = (1ull << 32)
     };
 
-
+    // デバイス
     enum DeviceType
     {
         DEVICE_NONE,
         DEVICE_KEYBOARD,
-        DEVICE_GAMEPAD,
+        DEVICE_GAMEPAD
     };
 
-
+    // 入力システム
     void Init();
     void Update();
     void Draw();
     void Fin();
 
-
+    // 基本入力
     bool IsInputKey(InputKey key);
     bool IsTriggerKey(InputKey key);
+    bool IsReleaseKey(InputKey key);
 
-
+    // 移動
+    bool IsMove();
+    VECTOR GetMove();
     bool IsMoveUp();
     bool IsMoveDown();
     bool IsMoveLeft();
     bool IsMoveRight();
 
+    // ジャンプ
     bool IsJump();
     bool IsTriggerJump();
+    bool IsReleaseJump();
 
+    // アクション
     bool IsAttack();
+    bool IsRolling();
     bool IsShooting();
 
+    // メニュー
     bool IsMenu();
 
-    bool IsRolling();
-
+    // カメラ
 
     bool IsCameraUp();
     bool IsCameraDown();
@@ -93,13 +100,13 @@ namespace Input
     bool IsCameraRight();
     bool IsCameraReset();
 
-
+    // スキル
     bool IsSkill1();
     bool IsSkill2();
     bool IsSkill3();
     bool IsSkill4();
 
-
+    // スティック
     float GetStickLX();
     float GetStickLY();
     float GetStickRX();

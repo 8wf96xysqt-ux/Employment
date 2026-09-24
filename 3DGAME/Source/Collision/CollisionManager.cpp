@@ -2,7 +2,6 @@
 #include "CollisionAABB.h"
 #include "CollisionSphere.h"
 #include "CollisionOBB.h"
-#include "CollisionSlope.h"
 #include "../Player/PlayerManager.h"
 #include "../Player/Player.h"
 #include "../StageObject/Block/Block.h"
@@ -22,7 +21,6 @@ CollisionManager::CollisionManager()
 	{
 		m_AABB[i] = nullptr;
 		m_Sphere[i] = nullptr;
-		m_Slope[i] = nullptr;
 		m_OBB[i] = nullptr;
 	}
 }
@@ -165,34 +163,6 @@ void CollisionManager::DeleteSphere(CollisionSphere* targetSphere)
 	}
 }
 
-CollisionSlope* CollisionManager::CreateSlope()
-{
-	CollisionSlope* result = nullptr;
-
-	for (int i = 0; i < COLLISION_MAX; i++)
-	{
-		if (!m_Slope[i])
-		{
-			m_Slope[i] = result = new CollisionSlope;
-			break;
-		}
-	}
-
-	return result;
-}
-
-void CollisionManager::DeleteSlope(CollisionSlope* targetSlope)
-{
-	for (int i = 0; i < COLLISION_MAX; i++)
-	{
-		if (m_Slope[i] == targetSlope)
-		{
-			delete targetSlope;
-			m_Slope[i] = nullptr;
-			break;
-		}
-	}
-}
 
 CollisionOBB* CollisionManager::CreateOBB()
 {

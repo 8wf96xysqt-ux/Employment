@@ -1,239 +1,252 @@
-#include "Player.h"
-#include "../Input//Input.h"
-#include "../MyMath/MyMath.h"
+ï»¿#include "Player.h"
+#include "../StageObject/StageObjectManager.h"
 #include "../Collision/CollisionManager.h"
 #include "../Collision/CollisionAABB.h"
-#include "../Collision/CollisionSphere.h"
 #include "../Collision/CollisionOBB.h"
-#include <math.h>
-#include "../Camera/CameraManager.h"
-#include "../StageObject/StageObjectManager.h"
 #include "../StageObject/StageObject.h"
+#include "../GameSetting/GameSetting.h"
 #include "../State/PlayerStateIdle.h"
+#include "../Camera/CameraManager.h"
+#include "../GameSetting/Color.h"
+#include "../Input/Input.h"
+#include "../MyMath/MyMath.h"
+#include "../FPS/FPS.h"
+#include <math.h>
+#include "../ParameterData/AttackDataManager.h"
+#include "../ParameterData/PlayerDataManager.h"
 
-#define ROTATION_SPEED  0.1f
-#define PLAYER_ROTATION_SPEED 0.25f
-#define MOVE_SPEED      0.08f
-#define GRAVITY         0.01f
-#define JUMP_POW        0.12f
-#define ROLL_SPEED 0.07f
-#define ROLL_TIME 0.7f
-#define MAX_FALL_SPEED 0.4
-// ƒAƒjƒ[ƒVƒ‡ƒ“í—Ş‚²‚Æ‚ÌÄ¶‘¬“x
-#define ANIM_SPEED_LANDING     1.0f
-#define ANIM_SPEED_DIE         1.0f
-#define ANIM_SPEED_FALLING     1.0f
-#define ANIM_SPEED_AIRCOMBO1   1.5f
-#define ANIM_SPEED_AIRCOMBO2   1.5f
-#define ANIM_SPEED_DASHCOMBO1  1.5f
-#define ANIM_SPEED_DASHCOMBO2  1.5f
-#define ANIM_SPEED_DASHJUMP    1.0f
-#define ANIM_SPEED_GDCOMBO1    1.2f
-#define ANIM_SPEED_GDCOMBO2    1.2f
-#define ANIM_SPEED_IDLE        1.0f
-#define ANIM_SPEED_JUMP        1.0f
-#define ANIM_SPEED_RUN         0.6f
-#define ANIM_SPEED_WALK        0.6f
-#define ANIM_SPEED_ROLLING     1.5f
-//ƒAƒ^ƒbƒN
-#define AIR_ATTACK_FREEZE_TIME 0.05f  // ‹ó’†UŒ‚ŠJn‚ÉÃ~‚·‚éŠÔ(•b)
-
-
-// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 Player::Player()
+    : m_Handle(-1)
+    , m_Scale(VGet(0.0f, 0.0f, 0.0f))
+    , m_Move(VGet(0.0f, 0.0f, 0.0f))
+    , m_PlayerData(nullptr)
+    , m_AABB(nullptr)
+    , m_AttackOBB(nullptr)
+
+    , m_IsGround(true)
+    , m_HasHovered(false)
+
+    // ã‚³ãƒ¨ãƒ¼ãƒ†ã‚¿ã‚¤ãƒ  & å…¥åŠ›ãƒãƒƒãƒ•ã‚¡
+    , m_CoyoteTime(0.0f)
+    , m_CoyoteTimeMax(0.0f)
+    , m_JumpBufferTime(0.0f)
+    , m_JumpBufferTimeMax(0.0f)
+
+    , m_IsAttack(false)
+    // ã‚¢ã‚¿ãƒƒã‚¯
+    , m_HasAirAttacked(false)
+    , m_AttackData(nullptr)
+
+    , m_TargetYawValue(0)
+
+    , m_pState(nullptr)
+
+    , m_LastGroundY(0.0f)
 {
-    m_Handle = 0;
-    m_AnimationAttachIndex = 0;
-    m_AnimationTotalTime = 0.0f;
-    m_AnimationNowTime = 0.0f;
-    m_IsLoopAnimation = false;
-    m_AnimationSpeed = 0.0f;
-    m_NowAnimation = PLAYER_ANIMATION_IDLE;
-
-    m_Pos = VGet(0.0f, 0.0f, 0.0f);
-    m_Rot = VGet(0.0f, 0.0f, 0.0f);
-    m_Scale = VGet(0.0f, 0.0f, 0.0f);
-    m_Move = VGet(0.0, 0.0f, 0.0f);
-    m_PrevPos = VGet(0.0, 0.0f, 0.0f);
-
-    m_AABB = nullptr;
-    m_AttackOBB = nullptr;
-    m_SphereCollision = nullptr;
-
-    m_VelY = 0.0f;
-    m_IsGround = true;
-    m_IsJumping = false;
-    m_IsFalling = false;
-    //ƒRƒˆ[ƒeƒ^ƒCƒ€ & “ü—Íƒoƒbƒtƒ@
-    m_CoyoteTime = 0.0f;
-    m_CoyoteTimeMax = 0.0f;
-    m_JumpBufferTime = 0.0f;
-    m_JumpBufferTimeMax = 0.0f;
-
-    m_JumpHold = false;
-    m_JumpHoldTime = 0.0f;
-    m_JumpHoldMax = 0.0f;   // ’·‰Ÿ‚µ‚Å 0.2•b‚Ü‚Åã¸‚ğ’Ç‰Á
-
-    m_IsAttack = false;
-    m_IsAttackHit = false;
-    //ƒRƒ“ƒ{
-    m_Combo = 0;
-    m_AttackBuffer = false;
-    m_ComboType = ComboType::COMBO_NONE;
-    //ƒAƒ^ƒbƒN
-    m_IsAirAttackFreeze = false;
-    m_AirAttackFreezeTime = 0.0f;
-    m_AirAttackFreezeTimeMax = AIR_ATTACK_FREEZE_TIME;
-    m_HasAirAttacked = false;
-
-    // ƒ[ƒŠƒ“ƒO
-    m_IsRolling = false;
-    m_RollTime = 0.0f;
-    m_RollTimeMax = 0.0f;
-    m_RollDir = VGet(0, 0, 0);
-
-    m_PiScale = 0;
-    m_TargetYawValue = 0;
-
-    m_FallAnimDelay = 0.0f;
-    m_FallAnimDelayMax = 0.0f;
-    m_IsInvincible = false;
-    m_InvincibleTime = 0.0f;
-
-    m_pState = nullptr;
-
-
 }
 
-// ƒfƒXƒgƒ‰ƒNƒ^
+// ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 Player::~Player()
 {
     Fin();
 }
 
-// ‰Šú‰»
+// åˆæœŸåŒ–
 void Player::Init()
 {
+    PlayerDataManager* manager = PlayerDataManager::GetInstance();
+
+    if (manager == nullptr)
+    {
+        return;
+    }
+
+    m_PlayerData = manager->GetParameter();
+
+    if (m_PlayerData == nullptr)
+    {
+        return;
+    }
+
     m_AABB = CollisionManager::GetInstance()->CreateAABB();
     m_AABB->SetTargetPos(&m_Pos);
-    m_AABB->SetLocalPos(VGet(0, 0.6f, 0));
-    m_AABB->SetSize(VGet(0.7f, 1.3f, 0.7f));
+
+    m_AABB->SetLocalPos(VGet(m_PlayerData->aabbOffsetX,m_PlayerData->aabbOffsetY,m_PlayerData->aabbOffsetZ));
+
+    m_AABB->SetSize(VGet( m_PlayerData->aabbSizeX, m_PlayerData->aabbSizeY, m_PlayerData->aabbSizeZ));
 
     m_AttackOBB = CollisionManager::GetInstance()->CreateOBB();
 
     m_AttackOBB->SetTargetPos(&m_Pos);
-    m_AttackOBB->SetLocalPos(VGet(0.5f, 1.2f, 0));
+    m_AttackOBB->SetLocalPos(VGet(0, 1.0f, 0));
     m_AttackOBB->SetSize(VGet(0.8f, 0.8f, 0.8f));
     m_AttackOBB->SetRotation(m_Rot.y);
+    m_AttackOBB->SetActive(false);
 
-    //‰Šú‰»
     m_CoyoteTime = 0.0f;
-    m_CoyoteTimeMax = 0.1f;
+    m_CoyoteTimeMax = m_PlayerData->coyoteTime;
+
     m_JumpBufferTime = 0.0f;
-    m_JumpBufferTimeMax = 0.1f;
-
-    m_RollTimeMax = ROLL_TIME;
-
-    m_FallAnimDelay = 0.0f;
-    m_FallAnimDelayMax = 0.6f;   
-    //–³“GŠÔ
-    m_InvincibleTime = 0.0f;
-
-
+    m_JumpBufferTimeMax = m_PlayerData->jumpBufferTime;
 }
 
-// ƒ[ƒh
+// ãƒ­ãƒ¼ãƒ‰
 void Player::Load()
 {
-    m_Handle = MV1LoadModel("Data/Player/Bot.x");
+    m_Handle = MV1LoadModel("Data/Player/Test19.x");
 }
 
-// ŠJn
+// é–‹å§‹
 void Player::Start()
 {
-    m_Pos = VGet(0.0f, 2.5f, 0.0f);
+    m_Pos = VGet(0.0f, 1.0f, 0.0f);
     m_Rot = VGet(0.0f, 0.0f, 0.0f);
-    m_Scale = VGet(1.0f, 1.0f, 1.0f);
+    m_Scale = VGet(m_PlayerData->scale, m_PlayerData->scale,m_PlayerData->scale);
 
-    m_Move = VGet(0.0, 0.0f, 0.0f);
+    m_Move = VGet(0.0f, 0.0f, 0.0f);
 
-    m_NowAnimation = (PlayerAnimationType)-1;
-    PlayAnimation(PLAYER_ANIMATION_IDLE, true);
+    m_Animation.Init(m_Handle);
+    m_Animation.Play(PLAYER_ANIMATION_IDLE, true,m_PlayerData->animSpeedIdle);
+
+    m_pState = new PlayerStateIdle();
+    m_pState->Enter(this);
 }
 
 void Player::Step()
 {
+    // å‰ãƒ•ãƒ¬ãƒ¼ãƒ ã®ä½ç½®ã‚’ä¿å­˜
     m_PrevPos = m_Pos;
 
-    UpdateGravity();
+    // ã‚¸ãƒ£ãƒ³ãƒ—å…¥åŠ›ã‚’ãƒãƒƒãƒ•ã‚¡ã«ä¿å­˜
+    if (Input::IsTriggerJump())
+    {
+        SetJumpBuffer();
+    }
 
-    UpdateJump();
+    UpdateJumpBuffer();
 
-    UpdateRolling();
-
-    UpdateAttack();
-
-    UpdateMove();
-
+    // é‡åŠ›ãƒ»ç„¡æ•µæ™‚é–“ã‚’æ›´æ–°
+    m_Gravity.Update(m_Move.y);
     UpdateInvincible();
-
 }
+
 void Player::Update()
 {
-    /*
-    // Ÿ‚ÌState‚ğæ“¾
+    if (m_pState == nullptr)
+    {
+        return;
+    }
+
     PlayerStateBase* nextState = m_pState->GetNextState();
 
-    // Ÿ‚ÌState‚ª‚ ‚éê‡‚ÍØ‚è‘Ö‚¦
-    if (m_pState != nextState)
+    // æ¬¡ã®StateãŒå­˜åœ¨ã™ã‚‹ã¨ãã ã‘åˆ‡æ›¿
+    if (nextState != nullptr && m_pState != nextState)
     {
-        // Œ»İ‚ÌState‚ğI—¹
         m_pState->Exit();
-        // Ÿ‚ÌState‚ÉØ‚è‘Ö‚¦
+
         delete m_pState;
+
         m_pState = nextState;
-        // V‚µ‚¢State‚Ì‰Šú‰»
+
         m_pState->Enter(this);
     }
 
-    // Œ»İ‚ÌState‚ÌXVˆ—‚ğÀs
+    // Stateã®æ›´æ–°
     m_pState->Update();
-    */
 
+    // ãƒ¢ãƒ‡ãƒ«ãƒ»ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®æ›´æ–°
     MV1SetPosition(m_Handle, m_Pos);
     MV1SetRotationXYZ(m_Handle, m_Rot);
     MV1SetScale(m_Handle, m_Scale);
+    m_Animation.Update();
+
+    // æ”»æ’ƒåˆ¤å®šã®æ›´æ–°
     UpdateAttackOBB();
-    UpdateAnimation();
 }
 
-// •`‰æ
+const char* Player::GetStateTypeName() const
+{
+    if (m_pState == nullptr)
+    {
+        return "None";
+    }
+
+    return GetPlayerStateTypeName(m_pState->GetStateType());
+}
+
+// æç”»
 void Player::Draw()
 {
+    // ãƒ¢ãƒ‡ãƒ«æç”»
     MV1DrawModel(m_Handle);
-    DrawFormatString(0, 0, GetColor(255, 255, 255), "À•W[%f, %f, %f]", m_Pos.x, m_Pos.y, m_Pos.z);
-    DrawFormatString(0, 20, GetColor(255, 255, 255), "‰ñ“][%f, %f, %f]", m_Rot.x, m_Rot.y, m_Rot.z);
-
-   /* int num = MV1GetAnimNum(m_Handle);
-
-    for (int i = 0; i < num; i++)
-    {
-        DrawFormatString(
-            500,
-            i * 50,
-            GetColor(255, 255, 255),
-            "%d : %s",
-            i,
-            MV1GetAnimName(m_Handle, i)
-        );
-    }*/
-
-
 }
 
-// I—¹
+void Player::DrawDebug()
+{
+#ifdef _DEBUG
+
+    // ãƒ‡ãƒãƒƒã‚°æ–‡å­—ã¯Zãƒãƒƒãƒ•ã‚¡ã®å½±éŸ¿ã‚’å—ã‘ãªã„ã‚ˆã†ã«ã™ã‚‹
+    SetUseZBuffer3D(FALSE);
+
+    DrawFormatString(0, 0, Color::White(),
+        "åº§æ¨™[%.2f, %.2f, %.2f]",
+        m_Pos.x, m_Pos.y, m_Pos.z);
+
+    DrawFormatString(0, 20, Color::White(),
+        "å›è»¢[%.2f, %.2f, %.2f]",
+        m_Rot.x, m_Rot.y, m_Rot.z);
+
+    DrawFormatString(0, 40, Color::Red(),
+        "State : %s",
+        GetStateTypeName());
+
+    DrawFormatString(0, 60, Color::White(),
+        "IsGround : %s",
+        IsGround() ? "TRUE" : "FALSE");
+
+    DrawFormatString(0, 80, Color::White(),
+        "VelocityY : %.3f",
+        m_Move.y);
+
+    DrawFormatString(0, 100, Color::White(),
+        "HasHovered : %s",
+        HasHovered() ? "TRUE" : "FALSE");
+
+    DrawFormatString(0, 120, Color::White(),
+        "HasAirAttacked : %s",
+        HasAirAttacked() ? "TRUE" : "FALSE");
+
+    DrawFormatString(0, 140, Color::White(),
+        "CoyoteTime : %.3f",
+        GetCoyoteTime());
+
+    DrawFormatString(0, 220, Color::White(),
+        "InvincibleTime : %.3f",
+        m_InvincibleTime);
+
+    DrawFormatString(0, 240, Color::White(),
+        "DeltaTime : %.4f",
+        FPSSystem::GetDeltaTime());
+
+    // Zãƒãƒƒãƒ•ã‚¡ã‚’å…ƒã«æˆ»ã™
+    SetUseZBuffer3D(TRUE);
+
+#endif
+}
+
+// çµ‚äº†
 void Player::Fin()
 {
+    if (m_pState)
+    {
+        m_pState->Exit();
+
+        delete m_pState;
+
+        m_pState = nullptr;
+    }
+
     if (m_AABB)
     {
         CollisionManager::GetInstance()->DeleteAABB(m_AABB);
@@ -246,43 +259,62 @@ void Player::Fin()
         m_AttackOBB = nullptr;
     }
 
-    MV1DeleteModel(m_Handle);
+    if (m_Handle != -1)
+    {
+        MV1DeleteModel(m_Handle);
+        m_Handle = -1;
+    }
 }
 
 void Player::UpdateAttackOBB()
 {
-    if (m_IsAttack &&
-        m_IsAttackHit)
+    if (!m_IsAttack)
     {
-        m_AttackOBB->SetRotation(m_Rot.y);
-
-
-        VECTOR pos;
-
-        float distance = 0.7f;
-
-        pos.x = sinf(m_Rot.y) * distance;
-        pos.y = 0.5f;
-        pos.z = cosf(m_Rot.y);
-
-
-        m_AttackOBB->SetLocalPos(pos);
+        m_AttackOBB->SetActive(false);
+        return;
     }
-    else
+
+    if (!m_AttackData)
     {
-        m_AttackOBB->SetLocalPos(
-            VGet(0, -100, 0)
-        );
+        m_AttackOBB->SetActive(false);
+        return;
     }
+
+    float nowTime = m_Animation.GetNowTime();
+
+    // CSVã®æ”»æ’ƒåˆ¤å®šç™ºç”Ÿæ™‚é–“ã¨æŒç¶šæ™‚é–“ã‚’ä½¿ç”¨
+    if (nowTime < m_AttackData->start || nowTime > m_AttackData->start + m_AttackData->duration)
+    {
+        m_AttackOBB->SetActive(false);
+        return;
+    }
+
+    m_AttackOBB->SetActive(true);
+    m_AttackOBB->SetRotation(m_Rot.y);
+
+    // CSVã®æ”»æ’ƒåˆ¤å®šã‚µã‚¤ã‚ºã‚’ä½¿ç”¨
+    m_AttackOBB->SetSize(VGet(m_AttackData->hitboxSizeX, m_AttackData->hitboxSizeY,m_AttackData->hitboxSizeZ));
+
+    // CSVã®ã‚ªãƒ•ã‚»ãƒƒãƒˆã‚’ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®å‘ãã«åˆã‚ã›ã¦å›è»¢
+    VECTOR pos;
+
+    pos.x =sinf(m_Rot.y) * m_AttackData->hitboxOffsetZ + cosf(m_Rot.y) * m_AttackData->hitboxOffsetX;
+
+    pos.y = m_AttackData->hitboxOffsetY;
+
+    pos.z = cosf(m_Rot.y) * m_AttackData->hitboxOffsetZ - sinf(m_Rot.y) * m_AttackData->hitboxOffsetX;
+
+    m_AttackOBB->SetLocalPos(pos);
 }
 
 float Player::RotCap(float rot)
 {
-    if (rot < 0.0f)
+    while (rot < 0.0f)
     {
         rot += DX_TWO_PI_F;
     }
-    else if (rot > DX_TWO_PI_F)
+
+    while (rot >= DX_TWO_PI_F)
     {
         rot -= DX_TWO_PI_F;
     }
@@ -290,37 +322,39 @@ float Player::RotCap(float rot)
     return rot;
 }
 
-// •ûŒü‰ñ“]
+// æ–¹å‘å›è»¢
 void Player::DirectionRot()
 {
+    float rotationSpeed = m_PlayerData->rotationSpeed;
+
     m_TargetYawValue = RotCap(m_TargetYawValue);
 
-    float difRot = 0.0f;
+    float difRot = m_TargetYawValue - m_Rot.y;
 
-    difRot = m_TargetYawValue - m_Rot.y;
+    float targetRotvalueMinRange =
+        m_TargetYawValue - rotationSpeed;
 
-    float targetRotvalueMinRange = m_TargetYawValue - PLAYER_ROTATION_SPEED;
-    float targetRotvalueMaxRange = m_TargetYawValue + PLAYER_ROTATION_SPEED;
+    float targetRotvalueMaxRange =
+        m_TargetYawValue + rotationSpeed;
 
     if (difRot > DX_PI_F || difRot < -DX_PI_F)
     {
         if (targetRotvalueMinRange > m_Rot.y)
         {
-            m_Rot.y -= PLAYER_ROTATION_SPEED;
+            m_Rot.y -= rotationSpeed;
         }
         else if (targetRotvalueMaxRange < m_Rot.y)
         {
-            m_Rot.y += PLAYER_ROTATION_SPEED;
+            m_Rot.y += rotationSpeed;
         }
     }
-
     else if (targetRotvalueMinRange > m_Rot.y)
     {
-        m_Rot.y += PLAYER_ROTATION_SPEED;
+        m_Rot.y += rotationSpeed;
     }
     else if (targetRotvalueMaxRange < m_Rot.y)
     {
-        m_Rot.y -= PLAYER_ROTATION_SPEED;
+        m_Rot.y -= rotationSpeed;
     }
     else
     {
@@ -330,608 +364,71 @@ void Player::DirectionRot()
     m_Rot.y = RotCap(m_Rot.y);
 }
 
-void Player::UpdateMove()
+// ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã‚’ç§»å‹•ã•ã›ã‚‹
+bool Player::UpdateMove(float speed)
 {
-    if (m_IsRolling)
+    VECTOR move = GetCameraMoveInput();
+
+    float inputLength = MyMath::VecLong(move);
+
+    if (inputLength <= m_PlayerData->moveInputThreshold)
     {
-        return;
+        m_Move.x = 0.0f;
+        m_Move.z = 0.0f;
+        return false;
     }
-    // ƒJƒƒ‰‚ÌŒü‚«æ“¾
-    float camYaw =
-        CameraManager::GetInstance()
-        ->GetCamera()
-        ->GetYaw();
 
+    move = MyMath::VecNormalize(move);
 
-    // ƒJƒƒ‰Šî€‚Ì‘O•ûŒü
-    VECTOR camForward =
-        MyMath::VecForwardZX(camYaw);
+    float moveSpeed = speed * inputLength;
 
+    m_Move.x = move.x * moveSpeed;
+    m_Move.z = move.z * moveSpeed;
 
-    // ƒJƒƒ‰Šî€‚Ì‰E•ûŒü
+    m_TargetYawValue = atan2f(move.x, move.z);
+    DirectionRot();
+
+    return true;
+}
+
+// ã‚«ãƒ¡ãƒ©åŸºæº–ã®ç§»å‹•æ–¹å‘ã‚’å–å¾—ã™ã‚‹
+VECTOR Player::GetCameraMoveInput()
+{
+    float camYaw = CameraManager::GetInstance()->GetCamera()->GetYaw();
+
+    VECTOR camForward = MyMath::VecForwardZX(camYaw);
+
     VECTOR camRight;
 
     camRight.x = camForward.z;
     camRight.y = 0.0f;
     camRight.z = -camForward.x;
 
-
     VECTOR move = VGet(0, 0, 0);
 
+    VECTOR input = Input::GetMove();
 
-    // “ü—Íæ“¾
-    float lx = Input::GetStickLX();
-    float ly = -Input::GetStickLY();
+    move = MyMath::VecAdd(move, MyMath::VecScale(camRight, input.x));
 
+    move = MyMath::VecAdd(move, MyMath::VecScale(camForward, input.z));
 
-    // ƒL[ƒ{[ƒh“ü—Í
-    if (Input::IsInputKey(Input::KEY_A))
-        lx -= 1.0f;
-
-    if (Input::IsInputKey(Input::KEY_D))
-        lx += 1.0f;
-
-    if (Input::IsInputKey(Input::KEY_W))
-        ly += 1.0f;
-
-    if (Input::IsInputKey(Input::KEY_S))
-        ly -= 1.0f;
-
-
-    // ƒJƒƒ‰•ûŒü‚Ö•ÏŠ·
-    move = MyMath::VecAdd(
-        move,
-        MyMath::VecScale(camRight, lx)
-    );
-
-    move = MyMath::VecAdd(
-        move,
-        MyMath::VecScale(camForward, ly)
-    );
-
-
-    float length = MyMath::VecLong(move);
-
-
-    // UŒ‚ƒLƒƒƒ“ƒZƒ‹”»’è
-    const float ATTACK_CANCEL_THRESHOLD = 0.3f;
-
-    if (m_IsAttack &&
-        m_IsGround &&
-        m_ComboType == ComboType::COMBO_GROUND &&
-        length > ATTACK_CANCEL_THRESHOLD)
-    {
-        m_IsAttack = false;
-        m_AttackBuffer = false;
-        m_Combo = 0;
-        m_ComboType = ComboType::COMBO_NONE;
-    }
-
-
-
-    // ‹ó’†UŒ‚’†‚ÍˆÚ“®‹Ö~
-    bool isAirAttacking =
-        m_IsAttack &&
-        (m_NowAnimation == PLAYER_ANIMATION_AIRCOMBO1 ||
-            m_NowAnimation == PLAYER_ANIMATION_AIRCOMBO2);
-
-
-    if (isAirAttacking)
-    {
-        m_Move.x = 0.0f;
-        m_Move.z = 0.0f;
-        return;
-    }
-
-
-    // ˆÚ“®“ü—Í‚ ‚è
-    if (length > 0.02f)
-    {
-        move = MyMath::VecNormalize(move);
-
-
-        float power = sqrtf(lx * lx + ly * ly);
-
-        if (power > 1.0f)
-        {
-            power = 1.0f;
-        }
-
-
-        m_Move.x = move.x * MOVE_SPEED * power;
-        m_Move.z = move.z * MOVE_SPEED * power;
-
-
-        // Œü‚«•ÏX
-        m_TargetYawValue = atan2f(move.x, move.z);
-
-        DirectionRot();
-
-
-
-        // ’nãƒAƒjƒ[ƒVƒ‡ƒ“
-        if (m_IsGround && !m_IsAttack)
-        {
-            if (power < 0.6f)
-            {
-                PlayAnimation(
-                    PLAYER_ANIMATION_WALK,
-                    true
-                );
-            }
-            else
-            {
-                PlayAnimation(
-                    PLAYER_ANIMATION_RUN,
-                    true
-                );
-            }
-        }
-    }
-    else
-    {
-        // “ü—Í‚È‚µ
-        if (!m_IsAttack)
-        {
-            m_Move.x = 0.0f;
-            m_Move.z = 0.0f;
-
-
-            if (m_IsGround)
-            {
-                PlayAnimation(
-                    PLAYER_ANIMATION_IDLE,
-                    true
-                );
-            }
-        }
-    }
+    return move;
 }
 
-void Player::UpdateJump()
-{
-
-    // ƒ[ƒŠƒ“ƒO’†‚ÍƒWƒƒƒ“ƒv•s‰Â
-    if (m_IsRolling)
-    {
-        return;
-    }
-
-    if (Input::IsTriggerJump())
-    {
-        m_JumpBufferTime = m_JumpBufferTimeMax;
-    }
-
-
-    if (m_JumpBufferTime > 0)
-    {
-        m_JumpBufferTime -= 1.0f / 60.0f;
-    }
-
-
-    if (m_CoyoteTime > 0 &&
-        m_JumpBufferTime > 0)
-    {
-        m_Move.y = JUMP_POW;
-
-        m_IsGround = false;
-
-        m_JumpBufferTime = 0;
-
-        m_JumpHold = true;
-        m_JumpHoldTime = 0;
-
-        m_IsAttack = false;
-
-        PlayAnimation(
-            PLAYER_ANIMATION_DASHJUMP,
-            true
-        );
-    }
-
-
-    // ‰Â•ÏƒWƒƒƒ“ƒv
-    if (!m_IsGround)
-    {
-        if (Input::IsJump())
-        {
-            m_JumpHoldMax = 0.1;
-
-            if (m_JumpHold &&
-                m_JumpHoldTime < m_JumpHoldMax)
-            {
-                m_Move.y += 0.006f;
-
-                m_JumpHoldTime += 1.0f / 60.0f;
-
-                m_IsJumping = true;
-            }
-        }
-        else
-        {
-            if (m_Move.y > 0)
-            {
-                m_Move.y *= 0.5f;
-            }
-
-            m_JumpHold = false;
-        }
-    }
-}
-void Player::UpdateGravity()
-{
-    bool isAirAttack =
-        m_IsAttack &&
-        (m_NowAnimation == PLAYER_ANIMATION_AIRCOMBO1 ||
-            m_NowAnimation == PLAYER_ANIMATION_AIRCOMBO2);
-
-    if (isAirAttack)
-    {
-        m_Move.y = 0.0f;
-    }
-    else
-    {
-        m_Move.y -= GRAVITY;
-
-        // —‰º‘¬“x§ŒÀ
-        if (m_Move.y < -MAX_FALL_SPEED)
-        {
-            m_Move.y = -MAX_FALL_SPEED;
-        }
-    }
-}
-void Player::UpdateAttack()
-{
-    // UŒ‚“ü—Í
-    if (Input::IsAttack())
-    {
-        // UŒ‚‚µ‚Ä‚¢‚È‚¢‚¾‚¯ŠJn
-        if (!m_IsAttack)
-        {
-            m_IsAttack = true;
-
-            m_Combo = 1;
-
-
-            // ‹ó’†UŒ‚
-            if (!m_IsGround && !m_HasAirAttacked)
-            {
-                m_ComboType = ComboType::COMBO_AIR;
-
-                PlayAnimation(
-                    PLAYER_ANIMATION_AIRCOMBO1,
-                    false
-                );
-
-
-                // ‹ó’†UŒ‚ŠJn‚Ì’â~
-                m_IsAirAttackFreeze = true;
-
-                m_AirAttackFreezeTime =
-                    m_AirAttackFreezeTimeMax;
-
-
-                m_Move = VGet(
-                    0.0f,
-                    0.0f,
-                    0.0f
-                );
-
-
-                m_HasAirAttacked = true;
-            }
-
-
-            // ƒ_ƒbƒVƒ…UŒ‚
-            else if (m_Move.x != 0.0f ||
-                m_Move.z != 0.0f)
-            {
-                m_ComboType = ComboType::COMBO_DASH;
-
-                PlayAnimation(
-                    PLAYER_ANIMATION_DASHCOMBO1,
-                    false
-                );
-            }
-
-
-            // ’ÊíUŒ‚
-            else
-            {
-                m_ComboType = ComboType::COMBO_GROUND;
-
-                PlayAnimation(
-                    PLAYER_ANIMATION_GDCOMBO1,
-                    false
-                );
-            }
-        }
-        else
-        {
-            // UŒ‚’†‚È‚çƒRƒ“ƒ{ó•t
-            m_AttackBuffer = true;
-        }
-    }
-}
-
-void Player::UpdateRolling()
-{
-
-
-    // ƒ[ƒŠƒ“ƒO’†
-    if (m_IsRolling)
-    {
-        m_RollTime -= 1.0f / 60.0f;
-
-
-        m_Move.x = m_RollDir.x * ROLL_SPEED;
-        m_Move.z = m_RollDir.z * ROLL_SPEED;
-
-
-        if (m_RollTime <= 0)
-        {
-            m_IsRolling = false;
-
-            m_Move.x = 0;
-            m_Move.z = 0;
-
-            m_IsInvincible = false;
-            m_InvincibleTime = 0.0f;
-
-
-            PlayAnimation(
-                PLAYER_ANIMATION_IDLE,
-                true
-            );
-        }
-
-        return;
-    }
-
-
-    // ƒ[ƒŠƒ“ƒOŠJn
-    if (Input::IsTriggerKey(Input::KEY_PAD_B))
-    {
-        // ‹ó’†‚Å‚Í•s‰Â
-        if (!m_IsGround)
-        {
-            return;
-        }
-
-
-        // UŒ‚ƒLƒƒƒ“ƒZƒ‹
-        m_IsAttack = false;
-        m_AttackBuffer = false;
-        m_Combo = 0;
-        m_ComboType = ComboType::COMBO_NONE;
-
-
-        m_IsRolling = true;
-
-        m_RollTime = m_RollTimeMax;
-
-        // ƒ[ƒŠƒ“ƒO–³“GŠJn
-        m_IsInvincible = true;
-        m_InvincibleTime = m_RollTimeMax;
-
-        // Œü‚¢‚Ä‚¢‚é•ûŒü‚Ö‰ñ”ğ
-        m_RollDir.x = sinf(m_Rot.y);
-        m_RollDir.y = 0;
-        m_RollDir.z = cosf(m_Rot.y);
-
-
-        PlayAnimation(
-            PLAYER_ANIMATION_ROLLING,
-            false
-        );
-    }
-}
-
-void Player::UpdateInvincible()
-{
-    if (!m_IsInvincible)
-        return;
-
-    m_InvincibleTime -= 1.0f / 60.0f; //60FPS‘z’è
-
-    if (m_InvincibleTime <= 0.0f)
-    {
-        m_InvincibleTime = 0.0f;
-        m_IsInvincible = false;
-    }
-}
-
-
-
-
-// ƒAƒjƒ[ƒVƒ‡ƒ“‚Ìí—Ş‚²‚Æ‚ÌÄ¶‘¬“x‚ğ•Ô‚·
-float Player::GetAnimationSpeed(PlayerAnimationType anim) const
-{
-    switch (anim)
-    {
-    case PLAYER_ANIMATION_LANDING:
-        return ANIM_SPEED_LANDING;
-
-    case PLAYER_ANIMATION_DIE:
-        return ANIM_SPEED_DIE;
-
-    case PLAYER_ANIMATION_FALLING:
-        return ANIM_SPEED_FALLING;
-
-    case PLAYER_ANIMATION_AIRCOMBO1:
-        return ANIM_SPEED_AIRCOMBO1;
-
-    case PLAYER_ANIMATION_AIRCOMBO2:
-        return ANIM_SPEED_AIRCOMBO2;
-
-    case PLAYER_ANIMATION_DASHCOMBO1:
-        return ANIM_SPEED_DASHCOMBO1;
-
-    case PLAYER_ANIMATION_DASHCOMBO2:
-        return ANIM_SPEED_DASHCOMBO2;
-
-    case PLAYER_ANIMATION_DASHJUMP:
-        return ANIM_SPEED_DASHJUMP;
-
-    case PLAYER_ANIMATION_GDCOMBO1:
-        return ANIM_SPEED_GDCOMBO1;
-
-    case PLAYER_ANIMATION_GDCOMBO2:
-        return ANIM_SPEED_GDCOMBO2;
-
-    case PLAYER_ANIMATION_IDLE:
-        return ANIM_SPEED_IDLE;
-
-    case PLAYER_ANIMATION_JUMP:
-        return ANIM_SPEED_JUMP;
-
-    case PLAYER_ANIMATION_RUN:
-        return ANIM_SPEED_RUN;
-
-    case PLAYER_ANIMATION_WALK:
-        return ANIM_SPEED_WALK;
-
-
-    case PLAYER_ANIMATION_ROLLING:
-        return ANIM_SPEED_ROLLING;
-
-    default:
-        return 1.0f;
-    }
-}
-
-// ƒAƒjƒ[ƒVƒ‡ƒ“Ä¶
-void Player::PlayAnimation(PlayerAnimationType anim, bool isLoop)
-{
-    if (anim == m_NowAnimation) return;
-
-    MV1DetachAnim(m_Handle, m_AnimationAttachIndex);
-    m_AnimationAttachIndex = MV1AttachAnim(m_Handle, anim);
-
-    m_AnimationTotalTime = MV1GetAttachAnimTotalTime(m_Handle, m_AnimationAttachIndex);
-    m_AnimationNowTime = 0;
-
-    m_IsLoopAnimation = isLoop;
-    m_NowAnimation = anim;
-
-    // Ä¶‚·‚éƒAƒjƒ[ƒVƒ‡ƒ“‚Ìí—Ş‚É‰‚¶‚½‘¬“x‚ğİ’è‚·‚é
-    m_AnimationSpeed = GetAnimationSpeed(anim);
-}
-
-// ƒAƒjƒ[ƒVƒ‡ƒ“XV
-void Player::UpdateAnimation()
-{
-    MV1SetAttachAnimTime(m_Handle, m_AnimationAttachIndex, m_AnimationNowTime);
-    m_AnimationNowTime += m_AnimationSpeed;
-
-
-
-    // ƒRƒ“ƒ{ó•t
-    float rate = m_AnimationNowTime / m_AnimationTotalTime;
-
-
-    if (m_IsAttack)
-    {
-        // UŒ‚‚ª“–‚½‚éŠÔ
-        if (rate > 0.3f &&
-            rate < 0.6f)
-        {
-            m_IsAttackHit = true;
-        }
-        else
-        {
-            m_IsAttackHit = false;
-        }
-    }
-
-    if (!m_IsGround)
-    {
-        m_FallAnimDelay -= 1.0f / 60.0f;
-
-        if (m_FallAnimDelay <= 0.0f)
-        {
-            // ‹ó’†UŒ‚’†Eƒ[ƒŠƒ“ƒO’†ˆÈŠO
-            if (!m_IsAttack &&
-                !m_IsRolling &&
-                m_NowAnimation != PLAYER_ANIMATION_FALLING)
-            {
-                PlayAnimation(
-                    PLAYER_ANIMATION_FALLING,
-                    true
-                );
-            }
-        }
-    }
-    else
-    {
-        m_FallAnimDelay = m_FallAnimDelayMax;
-    }
-
-    // 1’i–Ú¨2’i–Ú
-    if (m_Combo == 1 && rate >= 0.6f && m_AttackBuffer)
-    {
-        m_AttackBuffer = false;
-        m_Combo = 2;
-
-        if (m_ComboType == ComboType::COMBO_GROUND)
-            PlayAnimation(PLAYER_ANIMATION_GDCOMBO2, false);
-        else if (m_ComboType == ComboType::COMBO_DASH)
-            PlayAnimation(PLAYER_ANIMATION_DASHCOMBO2, false);
-        else if (m_ComboType == ComboType::COMBO_AIR)
-            PlayAnimation(PLAYER_ANIMATION_AIRCOMBO2, false);
-
-        return;
-    }
-
-    // 2’i–Ú¨3’i–Ú
-    if (m_Combo == 2 && rate >= 0.6f && m_AttackBuffer)
-    {
-        m_AttackBuffer = false;
-        m_Combo = 3;
-
-        if (m_ComboType == ComboType::COMBO_GROUND)
-            PlayAnimation(PLAYER_ANIMATION_GDCOMBO1, false);
-        else if (m_ComboType == ComboType::COMBO_DASH)
-            PlayAnimation(PLAYER_ANIMATION_DASHCOMBO1, false);
-        else if (m_ComboType == ComboType::COMBO_AIR)
-            PlayAnimation(PLAYER_ANIMATION_AIRCOMBO1, false);
-
-        return;
-    }
-
-    if (m_AnimationNowTime > m_AnimationTotalTime)
-    {
-        m_AnimationNowTime = m_IsLoopAnimation ? 0.0f : m_AnimationTotalTime;
-    }
-
-    if (!m_IsLoopAnimation &&m_AnimationNowTime >= m_AnimationTotalTime)
-    {
-        bool wasAirAttack = (m_NowAnimation == PLAYER_ANIMATION_AIRCOMBO1 || m_NowAnimation == PLAYER_ANIMATION_AIRCOMBO2);
-
-        m_IsAttack = false;
-        m_AttackBuffer = false;
-        m_Combo = 0;
-        m_ComboType = ComboType::COMBO_NONE;
-
-        // ‹ó’†UŒ‚‚ªI‚í‚Á‚Ä‚à‚Ü‚¾’…’n‚µ‚Ä‚¢‚È‚¯‚ê‚Î—‰ºƒAƒjƒ[ƒVƒ‡ƒ“‚Ö
-        if (wasAirAttack && !m_IsGround)
-        {
-            PlayAnimation(PLAYER_ANIMATION_DASHJUMP, true);
-        }
-    }
-
-
-}
-
-//ƒXƒe[ƒW“–‚½‚è”»’è
-void Player::CheckHitStageObjects(const std::vector<StageObject*> objects)
+// ã‚¹ãƒ†ãƒ¼ã‚¸å½“ãŸã‚Šåˆ¤å®š
+void Player::CheckHitStageObjects(const std::vector<StageObject*>& objects)
 {
     // X
-    m_Pos.x += m_Move.x;
+    m_Pos.x += m_Move.x * TARGET_FPS * FPSSystem::GetDeltaTime();
+
     for (auto obj : objects)
     {
         const CollisionAABB* objAABB = obj->GetAABB();
-        if (!objAABB) continue;
+
+        if (!objAABB)
+        {
+            continue;
+        }
 
         if (m_AABB->CheckAABB(objAABB))
         {
@@ -942,58 +439,74 @@ void Player::CheckHitStageObjects(const std::vector<StageObject*> objects)
     bool wasGround = m_IsGround;
 
     bool hitGround = false;
-    // Y
-    m_Pos.y += m_Move.y;
+
+    float moveY = m_Move.y * TARGET_FPS * FPSSystem::GetDeltaTime();
+
+    m_Pos.y += moveY;
 
     for (auto obj : objects)
     {
         const CollisionAABB* objAABB = obj->GetAABB();
-        if (!objAABB) continue;
+
+        if (!objAABB)
+        {
+            continue;
+        }
 
         if (m_AABB->CheckAABB(objAABB))
         {
             m_Pos.y = m_PrevPos.y;
             m_Move.y = 0.0f;
 
-            hitGround = true;
-           
+            // ä¸‹æ–¹å‘ã«ç§»å‹•ã—ã¦ã„ãŸå ´åˆã ã‘ç€åœ°
+            if (moveY < 0.0f)
+            {
+                hitGround = true;
+            }
         }
     }
 
     if (hitGround)
     {
         m_IsGround = true;
-        m_IsJumping = false;
-        m_CoyoteTime = m_CoyoteTimeMax;
-        m_HasAirAttacked = false;
 
-        // —‰ºƒ^ƒCƒ}[ƒŠƒZƒbƒg
-        m_FallAnimDelay = m_FallAnimDelayMax;
+        // ç€åœ°ã—ãŸã®ã§ã‚³ãƒ¨ãƒ¼ãƒ†ã‚¿ã‚¤ãƒ çµ‚äº†
+        m_CoyoteTime = 0.0f;
+
+        m_HasAirAttacked = false;
+        m_LastGroundY = m_Pos.y;
     }
     else
     {
-        if (m_IsGround)
-        {
-            m_IsGround = false;
-        }
+        m_IsGround = false;
 
-        if (m_CoyoteTime > 0.0f)
+        // åœ°é¢ã‹ã‚‰é›¢ã‚ŒãŸç¬é–“ã ã‘ã‚³ãƒ¨ãƒ¼ãƒ†ã‚¿ã‚¤ãƒ é–‹å§‹
+        if (wasGround)
         {
-            m_CoyoteTime -= 1.0f / 60.0f;
+            m_CoyoteTime = m_CoyoteTimeMax;
+        }
+        else if (m_CoyoteTime > 0.0f)
+        {
+            m_CoyoteTime -= FPSSystem::GetDeltaTime();
         }
     }
+
     // Z
-    m_Pos.z += m_Move.z;
+    m_Pos.z += m_Move.z * TARGET_FPS * FPSSystem::GetDeltaTime();
+
     for (auto obj : objects)
     {
         const CollisionAABB* objAABB = obj->GetAABB();
-        if (!objAABB) continue;
+
+        if (!objAABB)
+        {
+            continue;
+        }
 
         if (m_AABB->CheckAABB(objAABB))
         {
             m_Pos.z = m_PrevPos.z;
         }
     }
-
-
 }
+

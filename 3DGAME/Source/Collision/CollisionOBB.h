@@ -16,7 +16,7 @@ public:
     void SetLocalPos(VECTOR localPos) { m_LocalPos = localPos; }
     void SetSize(VECTOR size) { m_Size = size; }
     void SetRotation(float rotY) { m_RotY = rotY; }
-
+    void SetActive(bool active) { m_IsActive = active; }
 
     VECTOR GetTargetPos() const { return *m_TargetPos; }
     VECTOR GetLocalPos() const { return m_LocalPos; }
@@ -24,6 +24,7 @@ public:
 
     float GetRotation() const { return m_RotY; }
 
+    bool IsActive() const { return m_IsActive; }
 
 public:
     bool CheckOBB(const CollisionOBB* other) const;
@@ -38,4 +39,6 @@ private:
     VECTOR m_Size;
     // Y軸回転
     float m_RotY;
+    //アクティブか
+    bool m_IsActive;
 };

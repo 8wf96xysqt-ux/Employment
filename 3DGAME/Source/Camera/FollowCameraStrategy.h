@@ -1,25 +1,22 @@
 #pragma once
 #include "CameraStrategy.h"
-
-// 新しく作成されたFollowカメラの挙動
 class FollowCameraStrategy : public CameraStrategy
 {
 public:
-	FollowCameraStrategy() = default;
-	virtual ~FollowCameraStrategy() = default;
-
-	// カメラ挙動が切り替わった瞬間に1度だけ呼ばれる初期化関数
+	// カメラをこのストラテジーで使い始めるときの初期化
 	void Start(Camera* camera) override;
 
-	// 毎フレームのカメラ座標や注視点の計算処理
+	// 毎フレームのカメラ更新
 	void Update(Camera* camera) override;
+
 private:
-	// リセット回転用
-	float m_TargetYaw = 0.0f;
-
-	// 自動回転中か
+	// Rボタンなどでプレイヤーの向きへカメラを自動回転させているか
 	bool m_AutoRotate = false;
-
-	// カメラとプレイヤーの距離
+	// プレイヤーからカメラまでの距離
 	float m_CameraDistance = -3.0f;
+	// カメラが追従するY座標
+	// ジャンプ中はこの値を固定する
+	float m_CameraY = 0.0f;
+	// Rボタンを押したときのカメラの目標Yaw
+	float m_TargetYaw = 0.0f;
 };

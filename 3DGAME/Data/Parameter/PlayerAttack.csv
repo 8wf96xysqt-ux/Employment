@@ -1,0 +1,8 @@
+﻿Name,Animation,AnimationSpeed,Start,Duration,Damage,Interval,ChainRate,MoveSpeed,HitboxSizeX,HitboxSizeY,HitboxSizeZ,HitboxOffsetX,HitboxOffsetY,HitboxOffsetZ,RayLength
+Ground1,GDCOMBO1,1.2,10,4,1,100,0.8,0,0.8,0.8,0.8,0,0.5,0.7,0
+Ground2,GDCOMBO2,1.2,10,4,2,100,0.8,0,0.8,0.8,0.8,0,0.5,0.7,0
+Air1,AIRCOMBO1,1.4,10,4,1,100,0.8,0.03,0.8,0.8,0.8,0,0.5,0.7,0
+Air2,AIRCOMBO2,1.2,10,4,2,100,0.8,0.03,0.8,0.8,0.8,0,0.5,0.7,0
+Dash1,DASHCOMBO1,1.4,10,4,1,100,0.8,0.08,0.8,0.8,0.8,0,0.5,0.7,0
+Dash2,DASHCOMBO2,1.2,10,4,2,100,0.8,0.08,0.8,0.8,0.8,0,0.5,0.7,0
+Hover,HOVER,1,1,1,1,100,0,0.8,0.25,10,0.25,0.25,-4.5,0,20

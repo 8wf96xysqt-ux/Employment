@@ -7,23 +7,46 @@
 #include "../Camera/CameraManager.h"
 #include "../Stage/StageManager.h"
 #include "../StageObject/StageObjectManager.h"
+#include "../MyEffekseer/EffekseerManager.h"
+#include "../ParameterData/AttackDataManager.h"
+#include "../ShadowMap/ShadowMap.h"
+#include "../ParameterData/PlayerDataManager.h"
+#include "../Enemy/EnemyManager.h"
 
 
 
-PlayScene::PlayScene() : SceneBase()
+PlayScene::PlayScene()
+	: SceneBase()
 {
-	m_Floor = nullptr;
 }
 
 PlayScene::~PlayScene()
 {
+	Fin();
 }
 
 void PlayScene::Init()
 {
+	// Zバッファ
+	//SetUseZBuffer3D(TRUE);
+	//SetWriteZBuffer3D(TRUE);
+
 	// コリジョンマネージャー生成
 	CollisionManager::CreateInstance();
 
+	// プレイヤーデータ生成・ロード
+	PlayerDataManager::CreateInstance();
+	PlayerDataManager::GetInstance()->Load();
+
+	//アタックマネージャー生成・ロード
+	AttackDataManager::CreateInstance();
+	AttackDataManager::GetInstance()->Load();
+	
+	// Effekseer初期化
+	EffekseerManager::CreateInstence();
+	EffekseerManager::GetInstance()->Setup();
+	EffekseerManager::GetInstance()->Init();
+	
 	// プレイヤー生成
 	PlayerManager::CreateInstance();
 	PlayerManager::GetInstance()->CreatePlayer();
@@ -38,6 +61,14 @@ void PlayScene::Init()
 
 	// ステージマネージャー生成
 	StageManager::CreateInstance();
+
+	// エネミーマネージャー生成
+	EnemyManager::CreateInstance();
+	EnemyManager::GetInstance()->Init();
+
+	// シャドウマップ生成
+	ShadowMap::CreateInstance();
+	ShadowMap::GetInstance()->Init();
 
 	
 }
@@ -55,11 +86,17 @@ void PlayScene::Load()
 
 	// ステージをロード
 	StageManager::GetInstance()->Load("Data/Stage/SampleScene.json");
+
+
+	// Effekseerロード
+	EffekseerManager::GetInstance()->Load();
 }
 
 
 void PlayScene::Start()
 {
+	// Effekseer開始
+	EffekseerManager::GetInstance()->Start();
 
 	// ステージ開始
 	StageManager::GetInstance()->Start();
@@ -86,7 +123,8 @@ void PlayScene::Step()
 	// 当たり判定
 	CollisionManager::GetInstance()->CheckCollision();
 
-
+	// Effekseer更新
+	EffekseerManager::GetInstance()->Step();
 
 }
 
@@ -101,6 +139,12 @@ void PlayScene::Update()
 	// プレイヤー更新
 	PlayerManager::GetInstance()->Update();
 
+	// エネミー更新
+	EnemyManager::GetInstance()->Update();
+	
+	// Effekseer更新
+	EffekseerManager::GetInstance()->Update();
+
 	
 	
 
@@ -108,48 +152,83 @@ void PlayScene::Update()
 
 void PlayScene::Draw()
 {
-	// プレイヤー影描画
-	PlayerManager::GetInstance()->Draw();
+	// シャドウマップ作成
+	ShadowMap::GetInstance()->StartDrawShadowMap();
 
-	// ステージオブジェクト描画
+	PlayerManager::GetInstance()->Draw();
+	EnemyManager::GetInstance()->Draw();
 	StageObjectManager::GetInstance()->Draw();
+	StageManager::GetInstance()->Draw();
 
-	// プレイヤー影描画
+	ShadowMap::GetInstance()->EndDrawShadowMap();
+
+
+	// 通常描画
+	ShadowMap::GetInstance()->StartAppearsShadowMap();
+
 	PlayerManager::GetInstance()->Draw();
+	EnemyManager::GetInstance()->Draw();
+	StageObjectManager::GetInstance()->Draw();
+	StageManager::GetInstance()->Draw();
 
-	
-	//カメラ座標描画
+	ShadowMap::GetInstance()->EndAppearsShadowMap();
+
 	CameraManager::GetInstance()->Draw();
 
+	EffekseerManager::GetInstance()->Draw();
 
-	// 当たり判定描画
 	CollisionManager::GetInstance()->Draw();
 
-
+	PlayerManager::GetInstance()->DrawDebug();
 }
+
 
 void PlayScene::Fin()
 {
+
+	// Zバッファ無効
+	//SetUseZBuffer3D(FALSE);
+	//SetWriteZBuffer3D(FALSE);
+
+	//AttackData削除
+	AttackDataManager::DeleteInstance();
 
 	// ステージオブジェクト削除
 	StageObjectManager::DeleteInstance();
 
 	// ステージ削除
+
 	StageManager::DeleteInstance();
 
+	// プレイヤー終了
 	if (PlayerManager::GetInstance())
 	{
 		PlayerManager::GetInstance()->Fin();
 		PlayerManager::DeleteInstance();
 	}
 
+	//カメラ終了
 	if (CameraManager::GetInstance())
 	{
 		CameraManager::GetInstance()->Fin();
 		CameraManager::DeleteInstance();
 	}
 
+	// エネミー終了
+	if (EnemyManager::GetInstance())
+	{
+		EnemyManager::GetInstance()->Fin();
+		EnemyManager::DeleteInstance();
+	}
+
+	// コリジョンマネージャー削除
 	CollisionManager::DeleteInstance();
+
+	// シャドウマップ削除
+	ShadowMap::DeleteInstance();
+
+	// Effekseer終了
+	EffekseerManager::DeleteInstance();
 
 
 }

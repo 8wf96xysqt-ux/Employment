@@ -7,17 +7,15 @@
 SceneManager* SceneManager::m_Instance = nullptr;
 
 SceneManager::SceneManager()
+	: m_NowScene(nullptr)
+	, m_State(SCENE_STATE_NONE)
+	, m_NextScene(SCENE_TYPE_NONE)
 {
-	m_NowScene = nullptr;
-	m_State = SCENE_STATE_NONE;
-	m_NextScene = SCENE_TYPE_NONE;
-
 	for (int i = 0; i < SCENE_STATE_MAX; i++)
 	{
 		m_StateFunc[i] = nullptr;
 	}
 }
-
 SceneManager::~SceneManager()
 {
 	Fin();

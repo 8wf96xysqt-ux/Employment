@@ -4,12 +4,11 @@
 
 // コンストラクタ
 CollisionSphere::CollisionSphere()
+	: m_TargetPos(nullptr)
+	, m_LocalPos(VGet(0.0f, 0.0f, 0.0f))
+	, m_Radius(0.0f)
 {
-	m_TargetPos = nullptr;
-	m_LocalPos = VGet(0.0f, 0.0f, 0.0f);
-	m_Radius = 0.0f;
 }
-
 // デストラクタ
 CollisionSphere::~CollisionSphere()
 {
