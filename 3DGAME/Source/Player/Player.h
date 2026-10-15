@@ -29,8 +29,7 @@ public:
     void Fin();
 
     const char* GetStateTypeName() const;
-
-    float RotCap(float rot);
+    
     bool UpdateMove(float speed);
     void DirectionRot();
     float GetGroundY() const { return m_LastGroundY; }
@@ -82,10 +81,8 @@ public:
 
     // ダメージ処理
     void TakeDamage(int damage) override;
-
-    // 着地／離地フックのオーバーライド
-    void OnLand() override;
-    void OnLeaveGround() override;
+    // 即死処理
+    void Kill();
 
     // リスポーン地点
     void SetRespawnPoint(VECTOR pos, VECTOR rot);

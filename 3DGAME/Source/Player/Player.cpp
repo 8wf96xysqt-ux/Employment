@@ -119,10 +119,10 @@ void Player::Step()
     {
         return;
     }
-     // Y座標が-5以下になったら死亡ステートへ遷移
+     // Y座標が-5以下になったら即死させる
     if (m_Pos.y <= -5.0f)
     {
-        TakeDamage(m_HP);
+        Kill();
         return;
     }
 
@@ -273,21 +273,6 @@ void Player::Fin()
     }
 }
 
-float Player::RotCap(float rot)
-{
-    while (rot < 0.0f)
-    {
-        rot += DX_TWO_PI_F;
-    }
-
-    while (rot >= DX_TWO_PI_F)
-    {
-        rot -= DX_TWO_PI_F;
-    }
-
-    return rot;
-}
-
 // 方向回転
 void Player::DirectionRot()
 {
@@ -365,6 +350,24 @@ void Player::TakeDamage(int damage)
     }
 }
 
+void Player::Kill()
+{
+    // すでに死亡している場合は何もしない
+    if (IsDead())
+    {
+        return;
+    }
+
+    // HPを0にして死亡状態にする
+    CharacterBase::TakeDamage(m_HP);
+
+    // 死亡ステートへ遷移
+    if (m_pState != nullptr)
+    {
+        m_pState->ChangeState(std::make_unique<PlayerStateDead>());
+    }
+}
+
 // リスポーン地点を設定
 void Player::SetRespawnPoint(VECTOR pos, VECTOR rot)
 {
@@ -408,37 +411,109 @@ void Player::Respawn()
     {
         m_pState->ChangeState(std::make_unique<PlayerStateIdle>());
     }
-
+    //別のを考える
     // 敵を初期配置から再生成
     StageManager::GetInstance()->ResetEnemies();
 
 }
 
+//分離候補
+// ステージ当たり判定
 void Player::CheckHitStageObjects(const std::vector<StageObject*>& objects)
 {
-	m_Pos.x += m_Move.x * TARGET_FPS * FPSSystem::GetDeltaTime();
+    // X
+    m_Pos.x += m_Move.x * TARGET_FPS * FPSSystem::GetDeltaTime();
 
-    // 共通処理に委譲（OnLand/OnLeaveGround は自動で呼ばれる）
-    ResolveStageCollisions(objects, FPSSystem::GetDeltaTime());
+    for (auto obj : objects)
+    {
+        const CollisionAABB* objAABB = obj->GetAABB();
+
+        if (!objAABB)
+        {
+            continue;
+        }
+
+        if (m_AABB->CheckAABB(objAABB))
+        {
+            m_Pos.x = m_PrevPos.x;
+        }
+    }
+
+    bool wasGround = m_IsGround;
+
+    bool hitGround = false;
+
+    float moveY = m_Move.y * TARGET_FPS * FPSSystem::GetDeltaTime();
+
+    m_Pos.y += moveY;
+
+    for (auto obj : objects)
+    {
+        const CollisionAABB* objAABB = obj->GetAABB();
+
+        if (!objAABB)
+        {
+            continue;
+        }
+
+        if (m_AABB->CheckAABB(objAABB))
+        {
+            m_Pos.y = m_PrevPos.y;
+            m_Move.y = 0.0f;
+
+            // 下方向に移動していた場合だけ着地
+            if (moveY < 0.0f)
+            {
+                hitGround = true;
+            }
+        }
+    }
+
+    if (hitGround)
+    {
+        m_IsGround = true;
+
+        // 着地したのでコヨーテタイム終了
+        m_CoyoteTime = 0.0f;
+
+        m_AttackComponent.SetHasAirAttacked(false);
+
+        m_LastGroundY = m_Pos.y;
+    }
+
+    else
+    {
+        m_IsGround = false;
+
+        // 地面から離れた瞬間だけコヨーテタイム開始
+        if (wasGround)
+        {
+            m_CoyoteTime = m_CoyoteTimeMax;
+        }
+        else if (m_CoyoteTime > 0.0f)
+        {
+            m_CoyoteTime -= FPSSystem::GetDeltaTime();
+        }
+    }
+
+    // Z
+    m_Pos.z += m_Move.z * TARGET_FPS * FPSSystem::GetDeltaTime();
+
+    for (auto obj : objects)
+    {
+        const CollisionAABB* objAABB = obj->GetAABB();
+
+        if (!objAABB)
+        {
+            continue;
+        }
+
+        if (m_AABB->CheckAABB(objAABB))
+        {
+            m_Pos.z = m_PrevPos.z;
+        }
+    }
 }
-
-// ステージ当たり判定
-void Player::OnLand()
-{
-    // 着地したのでコヨーテタイム終了
-    m_CoyoteTime = 0.0f;
-
-    m_AttackComponent.SetHasAirAttacked(false);
-
-    m_LastGroundY = m_Pos.y;
-}
-
-void Player::OnLeaveGround()
-{
-    // 地面を離れた瞬間の処理（コヨーテ開始）
-    m_CoyoteTime = m_CoyoteTimeMax;
-}
-
 
 bool Player::CheckAttackHit(CollisionAABB* target)
 {

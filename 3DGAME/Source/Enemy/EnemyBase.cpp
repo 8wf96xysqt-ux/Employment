@@ -163,8 +163,63 @@ void EnemyBase::UpdateKnockback()
 
 void EnemyBase::CheckHitStageObjects(const std::vector<StageObject*>& objects)
 {
-    // 共通処理に委譲
-    ResolveStageCollisions(objects, FPSSystem::GetDeltaTime());
+    if (!m_AABB) return;
+
+    float deltaTime = FPSSystem::GetDeltaTime();
+
+    // X軸
+    m_Pos.x += m_Move.x * TARGET_FPS * deltaTime;
+
+    for (auto obj : objects)
+    {
+        if (!obj) continue;
+
+        const CollisionAABB* objAABB = obj->GetAABB();
+        if (!objAABB) continue;
+
+        if (m_AABB->CheckAABB(objAABB))
+        {
+            m_Pos.x = m_PrevPos.x;
+            break;
+        }
+    }
+
+    // Y軸
+    m_Pos.y += m_Move.y * TARGET_FPS * deltaTime;
+    m_IsGround = false;
+
+    for (auto obj : objects)
+    {
+        if (!obj) continue;
+
+        const CollisionAABB* objAABB = obj->GetAABB();
+        if (!objAABB) continue;
+
+        if (m_AABB->CheckAABB(objAABB))
+        {
+            m_Pos.y = m_PrevPos.y;
+            m_Move.y = 0.0f;
+            m_IsGround = true;
+            break;
+        }
+    }
+
+    // Z軸
+    m_Pos.z += m_Move.z * TARGET_FPS * deltaTime;
+
+    for (auto obj : objects)
+    {
+        if (!obj) continue;
+
+        const CollisionAABB* objAABB = obj->GetAABB();
+        if (!objAABB) continue;
+
+        if (m_AABB->CheckAABB(objAABB))
+        {
+            m_Pos.z = m_PrevPos.z;
+            break;
+        }
+    }
 }
 
 bool EnemyBase::IsKnockback() const
@@ -174,6 +229,5 @@ bool EnemyBase::IsKnockback() const
 
 bool EnemyBase::IsDeathAnimationFinished() const
 {
-    // デフォルト実装：死亡フラグに基づく。派生クラスでアニメーション完了判定が必要ならオーバーライドすること。
     return IsDead();
 }

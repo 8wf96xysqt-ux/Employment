@@ -7,7 +7,7 @@ RunInputThreshold,0.6
 JumpPower,0.16
 JumpHoldPower,0.001
 JumpCutRate,0.3
-CoyoteTime,0.1
+CoyoteTime,5
 JumpBufferTime,0.15
 FallAnimDelay,0.3
 RollSpeed,0.07

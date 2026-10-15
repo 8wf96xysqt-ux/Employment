@@ -51,15 +51,8 @@ public:
     // 移動量
     VECTOR GetMove() const { return m_Move; }
     void SetMove(VECTOR move) { m_Move = move; }
-
-    // ステージオブジェクトとの当たり判定解決（共通実装）
-    // deltaTime は FPSSystem::GetDeltaTime() を渡すこと
-    // 戻り値: Y方向で着地したかどうか
-    bool ResolveStageCollisions(const std::vector<StageObject*>& objects, float deltaTime);
-
-    // 着地 / 離地のフック（必要なら派生クラスでオーバーライド）
-    virtual void OnLand() {}
-    virtual void OnLeaveGround() {}
+private:
+    float RotCap(float rot);
 
 protected:
     // 無敵時間更新
@@ -97,4 +90,5 @@ protected:
 
     // 重力
     Gravity m_Gravity;
+
 };

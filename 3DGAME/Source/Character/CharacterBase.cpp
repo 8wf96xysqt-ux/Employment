@@ -104,21 +104,12 @@ void CharacterBase::SetRot(VECTOR rot)
 }
 
 // 目標方向へ回転
-void CharacterBase::RotateToward(float targetYaw, float rotationSpeed)
+void CharacterBase::RotateToward(float targetYaw,float rotationSpeed)
 {
-    while (targetYaw < 0.0f)
-    {
-        targetYaw += DX_TWO_PI_F;
-    }
-
-    while (targetYaw >= DX_TWO_PI_F)
-    {
-        targetYaw -= DX_TWO_PI_F;
-    }
+    targetYaw = RotCap(targetYaw);
 
     float difference = targetYaw - m_Rot.y;
 
-    // 最短方向に回転する
     if (difference > DX_PI_F)
     {
         difference -= DX_TWO_PI_F;
@@ -141,15 +132,22 @@ void CharacterBase::RotateToward(float targetYaw, float rotationSpeed)
         m_Rot.y -= rotationSpeed;
     }
 
-    while (m_Rot.y < 0.0f)
+    m_Rot.y = RotCap(m_Rot.y);
+}
+
+float CharacterBase::RotCap(float rot)
+{
+    while (rot < 0.0f)
     {
-        m_Rot.y += DX_TWO_PI_F;
+        rot += DX_TWO_PI_F;
     }
 
-    while (m_Rot.y >= DX_TWO_PI_F)
+    while (rot >= DX_TWO_PI_F)
     {
-        m_Rot.y -= DX_TWO_PI_F;
+        rot -= DX_TWO_PI_F;
     }
+
+    return rot;
 }
 
 // 無敵時間更新
@@ -221,77 +219,5 @@ bool CharacterBase::IsGround() const
 void CharacterBase::SetGround(bool value)
 {
     m_IsGround = value;
-}
-
-// 共通衝突解決: 軸分離で X/Y/Z を順に処理し、着地/離地イベントを通知する
-bool CharacterBase::ResolveStageCollisions(const std::vector<StageObject*>& objects, float deltaTime)
-{
-    if (!m_AABB) return false;
-
-    bool wasGround = m_IsGround;
-    bool hitGround = false;
-
-    // X
-    m_Pos.x += m_Move.x * TARGET_FPS * deltaTime;
-    for (auto obj : objects)
-    {
-        const CollisionAABB* objAABB = obj ? obj->GetAABB() : nullptr;
-        if (!objAABB) continue;
-        if (m_AABB->CheckAABB(objAABB))
-        {
-            m_Pos.x = m_PrevPos.x;
-            break;
-        }
-    }
-
-    // Y
-    float moveY = m_Move.y * TARGET_FPS * deltaTime;
-    m_Pos.y += moveY;
-    for (auto obj : objects)
-    {
-        const CollisionAABB* objAABB = obj ? obj->GetAABB() : nullptr;
-        if (!objAABB) continue;
-        if (m_AABB->CheckAABB(objAABB))
-        {
-            m_Pos.y = m_PrevPos.y;
-            m_Move.y = 0.0f;
-            if (moveY < 0.0f)
-            {
-                hitGround = true;
-            }
-            break;
-        }
-    }
-
-    // Z
-    m_Pos.z += m_Move.z * TARGET_FPS * deltaTime;
-    for (auto obj : objects)
-    {
-        const CollisionAABB* objAABB = obj ? obj->GetAABB() : nullptr;
-        if (!objAABB) continue;
-        if (m_AABB->CheckAABB(objAABB))
-        {
-            m_Pos.z = m_PrevPos.z;
-            break;
-        }
-    }
-
-    // フラグ更新と通知
-    if (hitGround && !wasGround)
-    {
-        m_IsGround = true;
-        OnLand();
-    }
-    else if (!hitGround && wasGround)
-    {
-        m_IsGround = false;
-        OnLeaveGround();
-    }
-    else
-    {
-        m_IsGround = hitGround;
-    }
-
-    return hitGround;
 }
 
