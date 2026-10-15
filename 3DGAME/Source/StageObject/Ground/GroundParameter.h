@@ -1,0 +1,6 @@
+enum GroundModelID
+{
+    GRASS_GROUND_MODEL_01,
+    DIRT_GROUND_MODEL_01,
+    GROUND_MODEL_MAX
+};

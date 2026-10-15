@@ -1,16 +1,26 @@
 #pragma once
 #include "PlayerStateBase.h"
 
+struct PlayerData;
+
 class PlayerStateMove : public PlayerStateBase
 {
 public:
-	PlayerStateMove() {};
-	~PlayerStateMove() {};
+	PlayerStateMove();
+	virtual~PlayerStateMove() {};
 
 	virtual void Enter(Player* player)override;
 
 	virtual void Update()override;
 
 	virtual void Exit()override;
+
+	PlayerStateType GetStateType() const override 
+	{ 
+		return PlayerStateType::MOVE; 
+	}
+
+private:
+	const PlayerData* m_PlayerData;
 
 };

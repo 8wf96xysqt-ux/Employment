@@ -12,4 +12,6 @@ public:
 
 	void Start() override;
 	StageObject* Clone() override;
+
+	bool IsCameraCollisionTarget() const override { return true; }
 };

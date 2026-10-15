@@ -1,0 +1,94 @@
+{
+    "items": [
+        {
+            "id": 0,
+            "position": {
+                "x": -6.241394519805908,
+                "y": 0.5,
+                "z": 31.75113296508789
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+            },
+            "name": "NormalEnemy",
+            "movementType": 0,
+            "circleRadius": 1.5,
+            "clockwise": true,
+            "patrolPoints": []
+        },
+        {
+            "id": 0,
+            "position": {
+                "x": -1.0,
+                "y": 0.5,
+                "z": 23.25
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+            },
+            "name": "NormalEnemy (1)",
+            "movementType": 1,
+            "circleRadius": 2.0,
+            "clockwise": true,
+            "patrolPoints": [
+                {
+                    "x": -1.0,
+                    "y": 0.5,
+                    "z": 23.25
+                },
+                {
+                    "x": -5.75,
+                    "y": 0.5,
+                    "z": 23.25
+                },
+                {
+                    "x": -1.0,
+                    "y": 0.5,
+                    "z": 19.0
+                },
+                {
+                    "x": 4.5,
+                    "y": 0.5,
+                    "z": 23.25
+                }
+            ]
+        },
+        {
+            "id": 0,
+            "position": {
+                "x": -1.25,
+                "y": 0.5,
+                "z": 33.75
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+            },
+            "name": "NormalEnemy (2)",
+            "movementType": 0,
+            "circleRadius": 2.0,
+            "clockwise": true,
+            "patrolPoints": []
+        }
+    ]
+}

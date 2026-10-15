@@ -1,8 +1,6 @@
 #pragma once
 #include "SceneBase.h"
 
-class Floor;
-
 class PlayScene : public SceneBase
 {
 public:
@@ -17,7 +15,4 @@ public:
 	void Update() override;
 	void Draw() override;
 	void Fin() override;
-
-private:
-	Floor* m_Floor;
 };

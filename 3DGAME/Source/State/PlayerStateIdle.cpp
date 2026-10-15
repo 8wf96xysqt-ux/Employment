@@ -1,74 +1,68 @@
-#include "DxLib.h"
-
 #include "../Player/Player.h"
 #include "PlayerStateIdle.h"
+#include "PlayerStateGroundAttack.h"
 #include "PlayerStateMove.h"
-#include "PlayerStateAttack.h"
 #include "PlayerStateJump.h"
 #include "PlayerStateRoll.h"
 #include "../Input/Input.h"
+#include "../ParameterData/PlayerDataManager.h"
 
+PlayerStateIdle::PlayerStateIdle()
+    :m_PlayerData(nullptr)
+{
+}
 
 void PlayerStateIdle::Enter(Player* player)
 {
     m_pPlayer = player;
+    m_PlayerData = PlayerDataManager::GetInstance()->GetParameter();
 
-    // 初期状態は自分を保持
-    m_pNextState = this;
-
-
-    // 待機アニメーション
-    m_pPlayer->PlayAnimation(PLAYER_ANIMATION_IDLE,true);
+    // 水平方向の移動を停止
+    VECTOR move = m_pPlayer->GetMove();
+    move.x = 0.0f;
+    move.z = 0.0f;
+    m_pPlayer->SetMove(move);
+    //待機アニメーション
+    m_pPlayer->PlayAnimation(PLAYER_ANIMATION_IDLE,true,m_PlayerData->animSpeedIdle);
 }
-
 
 void PlayerStateIdle::Update()
 {
-    
-    //移動入力
-    if (Input::GetStickLX() != 0 ||
-        Input::GetStickLY() != 0 ||
-        Input::IsInputKey(Input::KEY_W) ||
-        Input::IsInputKey(Input::KEY_A) ||
-        Input::IsInputKey(Input::KEY_S) ||
-        Input::IsInputKey(Input::KEY_D))
-    {
-        ChangeState(new PlayerStateMove());
+    Player* player = m_pPlayer;
 
-        return;
+    // ジャンプ
+    if (player->IsJumpBuffered())
+    {
+        if (player->IsGround() || player->GetCoyoteTime() > 0.0f)
+        {
+            player->ResetJumpBuffer();
+            ChangeState(std::make_unique<PlayerStateJump>());
+            return;
+        }
     }
 
-
-    //攻撃
+    // 攻撃
     if (Input::IsAttack())
     {
-        ChangeState(new PlayerStateAttack());
-
+        ChangeState(std::make_unique<PlayerStateGroundAttack>());
         return;
     }
 
-
-    
-    //ジャンプ
-    if (Input::IsTriggerJump())
+    // ロール
+    if (Input::IsRolling())
     {
-        ChangeState(new PlayerStateJump());
-
+        ChangeState(std::make_unique<PlayerStateRoll>());
         return;
     }
 
-
-    //ロール
-    if (Input::IsTriggerKey(Input::KEY_PAD_B))
+    // 移動
+    if (Input::IsMove())
     {
-        ChangeState(new PlayerStateRoll());
-
+        ChangeState(std::make_unique<PlayerStateMove>());
         return;
     }
 }
 
-
 void PlayerStateIdle::Exit()
 {
-
 }

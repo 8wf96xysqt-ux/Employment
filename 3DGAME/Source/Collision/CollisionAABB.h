@@ -2,6 +2,9 @@
 
 #include "DxLib.h"
 
+class CollisionSphere;
+class CollisionOBB;
+
 class CollisionAABB
 {
 public:
@@ -9,7 +12,7 @@ public:
 	~CollisionAABB();
 
 public:
-	void Draw();			// •`‰æ
+	void Draw();// •`‰æ
 
 public:
 	void SetTargetPos(VECTOR* targetPos) { m_TargetPos = targetPos; }
@@ -22,6 +25,8 @@ public:
 
 public:
 	bool CheckAABB(const CollisionAABB* other) const;
+	bool CheckSphere(const CollisionSphere* sphere) const;
+	bool CheckOBB(const CollisionOBB* obb) const;
 	bool CheckRayHit(VECTOR rayStart, VECTOR rayEnd) const;
 	bool CheckRayHit(VECTOR rayStart, VECTOR rayEnd, float* outT) const;
 private:

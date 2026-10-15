@@ -3,20 +3,20 @@
 #include "Floor/FloorParameter.h"
 #include "Block/Block.h"
 #include "Block/BlockParameter.h"
-#include "Slope/SlopeParameter.h"
-#include "Slope/Slope.h"
-#include "../Library/json/json.hpp"
-
-using json = nlohmann::json;
+#include "Ground/Ground.h"
+#include "Ground/GroundParameter.h"
+#include "Prop/Prop.h"
+#include "Prop/PropParameter.h"
 
 StageObjectManager* StageObjectManager::m_Instance = nullptr;
 
 StageObjectManager::StageObjectManager()
+	: m_StageObjects({})
+	, m_OriginalFloors(nullptr)
+	, m_OriginalGround(nullptr)
+	, m_OriginalBlocks(nullptr)
+	, m_OriginalProp(nullptr)
 {
-	m_StageObjects = {};
-	m_OriginalFloors = nullptr;
-	m_OriginalBlocks = nullptr;
-	m_OriginalSlopes = nullptr;
 }
 
 StageObjectManager::~StageObjectManager()
@@ -27,9 +27,10 @@ StageObjectManager::~StageObjectManager()
 void StageObjectManager::Init()
 {
 	// 複製元となるクラスを生成
-	m_OriginalFloors = new Floor[FLOOR_MAX];
-	m_OriginalBlocks = new Block[BLOCK_MAX];
-	m_OriginalSlopes = new Slope[SLOPE_MAX];
+	m_OriginalFloors = new Floor[FLOOR_MODEL_MAX];
+	m_OriginalGround = new Ground[GROUND_MODEL_MAX];
+	m_OriginalBlocks = new Block[BLOCK_MODEL_MAX];
+	m_OriginalProp   = new Prop[PROP_MODEL_MAX];
 }
 
 /// <summary>
@@ -38,13 +39,18 @@ void StageObjectManager::Init()
 void StageObjectManager::Load()
 {
 	// 床をロード
-	m_OriginalFloors[FLOOR_00].Load("Data/Floor/Floor.x");
+	m_OriginalFloors[FLOOR_MODEL_00].Load("Data/Floor/Floor.x");
+
+	// 地面をロード
+	m_OriginalGround[GRASS_GROUND_MODEL_01].Load("Data/Floor/GrassFloor.x");
+	m_OriginalGround[DIRT_GROUND_MODEL_01].Load("Data/Floor/DirtFloor.x");
 
 	// ブロックをロード
-	m_OriginalBlocks[BLOCK_00].Load("Data/Block/Block.x");
+	m_OriginalBlocks[BLOCK_MODEL_00].Load("Data/Block/Block.x");
 
-	//スロープをロード
-	m_OriginalSlopes[SLOPE_00].Load("Data/Slope/Slope2.x");
+	//小道具をロード
+	m_OriginalProp[FENCE_MODEL_00].Load("Data/Prop/Fence.x");
+	m_OriginalProp[FENCE_MODEL_01].Load("Data/Prop/Fence_01.x");
 }
 
 void StageObjectManager::Start()
@@ -74,17 +80,31 @@ void StageObjectManager::Draw()
 void StageObjectManager::Fin()
 {
 	delete[] m_OriginalFloors;
+	delete[] m_OriginalGround;
 	delete[] m_OriginalBlocks;
-	delete[] m_OriginalSlopes;
+	delete[] m_OriginalProp;
+
+	m_OriginalFloors = nullptr;
+	m_OriginalGround = nullptr;
+	m_OriginalBlocks = nullptr;
+	m_OriginalProp = nullptr;
 }
 
 Floor* StageObjectManager::CreateFloor(int id)
 {
 	// IDチェック
-	if (id < 0 || id > FLOOR_MAX) return nullptr;
+	if (id < 0 || id >= FLOOR_MODEL_MAX)
+	{
+		return nullptr;
+	}
 
 	// オリジナルから複製して生成
 	StageObject* floor = m_OriginalFloors[id].Clone();
+
+	if (floor == nullptr)
+	{
+		return nullptr;
+	}
 
 	// リストに追加
 	m_StageObjects.push_back(floor);
@@ -96,52 +116,126 @@ Floor* StageObjectManager::CreateFloor(int id)
 Floor* StageObjectManager::CreateFloor(int id, VECTOR pos, VECTOR rot, VECTOR scale)
 {
 	Floor* floor = CreateFloor(id);
+
+	if (floor == nullptr)
+	{
+		return nullptr;
+	}
+
 	floor->SetTransform(pos, rot, scale);
 
 	return floor;
 }
 
+Ground* StageObjectManager::CreateGround(int id)
+{
+	// IDチェック
+	if (id < 0 || id >= GROUND_MODEL_MAX)
+	{
+		return nullptr;
+	}
+
+	// オリジナルから複製して生成
+	StageObject* ground = m_OriginalGround[id].Clone();
+
+	if (ground == nullptr)
+	{
+		return nullptr;
+	}
+
+	// リストに追加
+	m_StageObjects.push_back(ground);
+
+	// 返却すれば作った後にいろいろいじれる
+	return static_cast<Ground*>(ground);
+}
+
+Ground* StageObjectManager::CreateGround(int id, VECTOR pos, VECTOR rot, VECTOR scale)
+{
+	Ground* ground = CreateGround(id);
+
+	if (ground == nullptr)
+	{
+		return nullptr;
+	}
+
+	ground->SetTransform(pos, rot, scale);
+
+	return ground;
+}
+
 Block* StageObjectManager::CreateBlock(int id)
 {
 	// IDチェック
-	if (id < 0 || id > BLOCK_MAX) return nullptr;
+	if (id < 0 || id >= BLOCK_MODEL_MAX)
+	{
+		return nullptr;
+	}
 
 	// オリジナルから複製して生成
 	StageObject* block = m_OriginalBlocks[id].Clone();
 
+	if (block == nullptr)
+	{
+		return nullptr;
+	}
+
 	// リストに追加
 	m_StageObjects.push_back(block);
 
-	// 返却すれば作った後にいろいろいじれる
 	return static_cast<Block*>(block);
 }
 
 Block* StageObjectManager::CreateBlock(int id, VECTOR pos, VECTOR rot, VECTOR scale)
 {
 	Block* block = CreateBlock(id);
+
+	if (block == nullptr)
+	{
+		return nullptr;
+	}
+
 	block->SetTransform(pos, rot, scale);
 
 	return block;
 }
 
-Slope* StageObjectManager::CreateSlope(int id)
+Prop* StageObjectManager::CreateProp(int id)
 {
-	//IDチェック
-	if (id < 0 || id > SLOPE_MAX) return nullptr;
+	// IDチェック
+	if (id < 0 || id >= PROP_MODEL_MAX)
+	{
+		return nullptr;
+	}
 
-	//オリジナルから複製して生成
-	StageObject* slope = m_OriginalSlopes[id].Clone();
+	// オリジナルから複製して生成
+	StageObject* prop = m_OriginalProp[id].Clone();
 
-	//リストに追加
-	m_StageObjects.push_back(slope);
+	if (prop == nullptr)
+	{
+		return nullptr;
+	}
 
-	return static_cast<Slope*>(slope);
+	Prop* result = static_cast<Prop*>(prop);
+	result->SetPropID(id);
+
+	// リストに追加
+	m_StageObjects.push_back(prop);
+
+	return static_cast<Prop*>(prop);
+	
 }
 
-Slope* StageObjectManager::CreateSlope(int id, VECTOR pos, VECTOR rot, VECTOR scale)
+Prop* StageObjectManager::CreateProp(int id, VECTOR pos, VECTOR rot, VECTOR scale)
 {
-	Slope* slope = CreateSlope(id);
-	slope->SetTransform(pos, rot, scale);
+	Prop* prop = CreateProp(id);
 
-	return slope;
+	if (prop == nullptr)
+	{
+		return nullptr;
+	}
+
+	prop->SetTransform(pos, rot, scale);
+
+	return prop;
 }

@@ -1,7 +1,5 @@
-#pragma once
-
 enum FloorID
 {
-	FLOOR_00,
-	FLOOR_MAX
+    FLOOR_MODEL_00,
+    FLOOR_MODEL_MAX
 };

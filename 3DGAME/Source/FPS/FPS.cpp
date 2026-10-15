@@ -1,62 +1,89 @@
 #include "DxLib.h"
 #include "FPS.h"
+#include "../GameSetting/Color.h"
+#include "../GameTime/GameTime.h"
 
-// 平均を計算するタイミング（大体はFPSと同じ数でOK）
-#define FPS_SAMPLE_NUM (60) // 60フレームに一度平均を計算する
-
-// ゲームのFPS
-#define FPS (60)
-
-int FPSSystem::m_StartTime = 0;      // 測定開始時刻
-int FPSSystem::m_Count = 0;          // カウンタ
-float FPSSystem::m_Fps = 0.0f;         // 現在のFPS
+// 静的メンバ変数の初期化
+int FPSSystem::m_StartTime = 0;
+int FPSSystem::m_Count = 0;
+float FPSSystem::m_Fps = 0.0f;
+float FPSSystem::m_DeltaTime = 0.0f;
+float FPSSystem::m_GameDeltaTime = 0.0f;
+int FPSSystem::m_PreviousTime = 0;
 
 void FPSSystem::Init()
 {
-	m_StartTime = GetNowCount();
-	m_Count = 0;
-	m_Fps = 0;
+    m_StartTime = GetNowCount();
+    m_PreviousTime = m_StartTime;
+
+    m_Count = 0;
+    m_Fps = 0.0f;
+
+    m_DeltaTime = 1.0f / static_cast<float>(TARGET_FPS);
+    m_GameDeltaTime = m_DeltaTime;
 }
 
 void FPSSystem::Update()
 {
-    // 1フレーム目なら時刻を記憶
-    if (m_Count == 0) 
-    { 
-        m_StartTime = GetNowCount();
+    int currentTime = GetNowCount();
+
+    // 実時間の経過時間
+    m_DeltaTime = (currentTime - m_PreviousTime) / 1000.0f;
+
+    if (m_DeltaTime > 0.05f)
+    {
+        m_DeltaTime = 0.05f;
     }
 
-    // サンプル数と同じ回数フレームが回ったら平均を計算する
-    if (m_Count == FPS_SAMPLE_NUM) { 
-        int time = GetNowCount();
-        // かかった時間（ﾐﾘ秒）をサンプル数で割り平均とする（その値が現在のFPS値）
-        m_Fps = 1000.f / ((time - m_StartTime) / (float)FPS_SAMPLE_NUM);
+    m_PreviousTime = currentTime;
+
+    // ゲーム内時間の経過時間
+    m_GameDeltaTime = m_DeltaTime * GameTime::GetTimeScale();
+
+    // FPS計測
+    if (m_Count == 0)
+    {
+        m_StartTime = currentTime;
+    }
+
+    if (m_Count == FPS_SAMPLE_NUM)
+    {
+        int time = currentTime;
+
+        m_Fps = 1000.0f /
+            ((time - m_StartTime) / static_cast<float>(FPS_SAMPLE_NUM));
+
         m_Count = 0;
         m_StartTime = time;
     }
-    m_Count++;
 
+    m_Count++;
 }
 
 void FPSSystem::Draw()
 {
-    DrawFormatString(0, 880, GetColor(255, 255, 255), "FPS【%.1f】", m_Fps);
+#ifdef _DEBUG
+    DrawFormatString(0, 880, Color::Red(), "FPS【%.1f】", m_Fps);
+#endif
 }
 
 void FPSSystem::WaitFPS()
 {
-    // かかった時間
     int takeTime = GetNowCount() - m_StartTime;
+    int waitTime = m_Count * 1000 / TARGET_FPS - takeTime;
 
-    // 待機時間
-    // FPSの値から1フレームにかかってほしい時間（g_Count * 1000 / FPS）
-    // 実際に経過した時間（takeTime）
-    // 実際の時間が早すぎた場合は、その差分を待機時間とする
-    int waitTime = m_Count * 1000 / FPS - takeTime; 
-
-    // 待機
-    if (waitTime > 0) 
+    if (waitTime > 0)
     {
         Sleep(waitTime);
     }
+}
+
+float FPSSystem::GetDeltaTime()
+{
+    return m_GameDeltaTime;
+}
+
+float FPSSystem::GetRealDeltaTime()
+{
+    return m_DeltaTime;
 }

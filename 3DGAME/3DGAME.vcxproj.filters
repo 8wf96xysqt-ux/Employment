@@ -46,11 +46,65 @@
     <Filter Include="Source\StageObject\Floor">
       <UniqueIdentifier>{08539fe7-185a-4974-b452-acf8dea98367}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\StageObject\Slope">
-      <UniqueIdentifier>{247e8846-d063-46c7-8b98-d28449767aa8}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\State">
       <UniqueIdentifier>{e9912ef2-ba7b-4be6-adb3-94ed139110fd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Animation">
+      <UniqueIdentifier>{5bd7715c-0fe4-4380-aa80-70b847b89cb3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\MyEffekseer">
+      <UniqueIdentifier>{d0125353-8708-40b5-b1eb-db5342359705}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\ParameterData">
+      <UniqueIdentifier>{cbbb4fee-adce-48c5-b04e-badfb2a8df80}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\ShadowMap">
+      <UniqueIdentifier>{3d2d3895-72f8-44ab-995b-2a8f73241447}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Physics">
+      <UniqueIdentifier>{23a8f856-8064-47ba-9ff4-ebbbbdb44925}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\ObjectPool">
+      <UniqueIdentifier>{3ac8e57b-d133-4481-a951-f87c8f6ad4aa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Character">
+      <UniqueIdentifier>{e0580b41-7402-4d10-a995-5bc6f9de5f25}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Enemy">
+      <UniqueIdentifier>{e17d459c-55db-4774-9ba7-89b6962e9c1e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\EnemyAI">
+      <UniqueIdentifier>{960fe265-3c07-4ecc-bd81-be01a392ff76}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\EnemyAI\BehaviorTree">
+      <UniqueIdentifier>{fe77aa77-cf4a-4b47-bc3a-3b568f7af3fd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\EnemyAI\Blackboard">
+      <UniqueIdentifier>{cd304ad7-37a0-4e20-bb74-0a45b53a2d31}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\EnemyAI\Composite">
+      <UniqueIdentifier>{c2808615-2766-4bc3-94fa-0509c3c62aee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\EnemyAI\Core">
+      <UniqueIdentifier>{c3dae715-1fff-494d-abdf-de3f0b8d6855}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\EnemyAI\Leaf">
+      <UniqueIdentifier>{9fed6821-4178-48d4-be58-11517ca8228b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\EnemyAI\BuildTree">
+      <UniqueIdentifier>{6c529767-f1d6-4894-ad06-94388a5e97d4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\StageObject\Ground">
+      <UniqueIdentifier>{2376632e-dfbe-4fc8-ad16-1f673bf94521}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\StageObject\Prop">
+      <UniqueIdentifier>{66a72c10-a4c9-48ca-b658-0f9f36f82834}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Attack">
+      <UniqueIdentifier>{407cdb68-a9fd-49ae-b557-aa31fdc9d35e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\GameTime">
+      <UniqueIdentifier>{fa6c25fb-6bc6-4143-bcc5-ab37e249e169}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -117,12 +171,6 @@
     <ClCompile Include="Source\StageObject\Block\Block.cpp">
       <Filter>Source\StageObject\Block</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Collision\CollisionSlope.cpp">
-      <Filter>Source\Collision</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\StageObject\Slope\Slope.cpp">
-      <Filter>Source\StageObject\Slope</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Collision\CollisionOBB.cpp">
       <Filter>Source\Collision</Filter>
     </ClCompile>
@@ -138,9 +186,6 @@
     <ClCompile Include="Source\Camera\FollowCameraStrategy.cpp">
       <Filter>Source\Camera</Filter>
     </ClCompile>
-    <ClCompile Include="Source\State\PlayerStateAttack.cpp">
-      <Filter>Source\State</Filter>
-    </ClCompile>
     <ClCompile Include="Source\State\PlayerStateIdle.cpp">
       <Filter>Source\State</Filter>
     </ClCompile>
@@ -152,6 +197,108 @@
     </ClCompile>
     <ClCompile Include="Source\State\PlayerStateRoll.cpp">
       <Filter>Source\State</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\State\PlayerStateAirAttack.cpp">
+      <Filter>Source\State</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\State\PlayerStateGroundAttack.cpp">
+      <Filter>Source\State</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\State\PlayerStateFall.cpp">
+      <Filter>Source\State</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\State\PlayerStateHover.cpp">
+      <Filter>Source\State</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\State\PlayerStateDashAttack.cpp">
+      <Filter>Source\State</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Animation\AnimationController.cpp">
+      <Filter>Source\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MyEffekseer\Effekseer.cpp">
+      <Filter>Source\MyEffekseer</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MyEffekseer\EffekseerManager.cpp">
+      <Filter>Source\MyEffekseer</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ParameterData\AttackDataManager.cpp">
+      <Filter>Source\ParameterData</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ParameterData\PlayerDataManager.cpp">
+      <Filter>Source\ParameterData</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ShadowMap\ShadowMap.cpp">
+      <Filter>Source\ShadowMap</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Physics\Gravity.cpp">
+      <Filter>Source\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Character\CharacterBase.cpp">
+      <Filter>Source\Character</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Enemy\EnemyBase.cpp">
+      <Filter>Source\Enemy</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Enemy\EnemyManager.cpp">
+      <Filter>Source\Enemy</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Enemy\NormalEnemy.cpp">
+      <Filter>Source\Enemy</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\State\PlayerStateDead.cpp">
+      <Filter>Source\State</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\EnemyAI\BehaviorTree\BehaviorTree.cpp">
+      <Filter>Source\EnemyAI\BehaviorTree</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\EnemyAI\Blackboard\BlackBoard.cpp">
+      <Filter>Source\EnemyAI\Blackboard</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\EnemyAI\Composite\CompositeNodeBase.cpp">
+      <Filter>Source\EnemyAI\Composite</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\EnemyAI\Core\NodeBase.cpp">
+      <Filter>Source\EnemyAI\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\EnemyAI\Leaf\ChasePlayer.cpp">
+      <Filter>Source\EnemyAI\Leaf</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\EnemyAI\Leaf\IsPlayerDetected.cpp">
+      <Filter>Source\EnemyAI\Leaf</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\EnemyAI\Leaf\LeafNodeBase.cpp">
+      <Filter>Source\EnemyAI\Leaf</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\EnemyAI\Leaf\Roam.cpp">
+      <Filter>Source\EnemyAI\Leaf</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\EnemyAI\Composite\Sequence.cpp">
+      <Filter>Source\EnemyAI\Composite</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\EnemyAI\Composite\Selector.cpp">
+      <Filter>Source\EnemyAI\Composite</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\EnemyAI\Leaf\ReturnToBase.cpp">
+      <Filter>Source\EnemyAI\Leaf</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\EnemyAI\BuildTree\NormalEnemyTree.cpp">
+      <Filter>Source\EnemyAI\BuildTree</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\StageObject\Ground\Ground.cpp">
+      <Filter>Source\StageObject\Ground</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\StageObject\Prop\Prop.cpp">
+      <Filter>Source\StageObject\Prop</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Attack\AttackComponent.cpp">
+      <Filter>Source\Attack</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\EnemyAI\Leaf\AttackPlayer.cpp">
+      <Filter>Source\EnemyAI\Leaf</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GameTime\GameTime.cpp">
+      <Filter>Source\GameTime</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -206,9 +353,6 @@
     <ClInclude Include="Source\MyMath\MyMath.h">
       <Filter>Source\MyMath</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Library\json\json.hpp">
-      <Filter>Source\Library\json</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Stage\StageManager.h">
       <Filter>Source\Stage</Filter>
     </ClInclude>
@@ -233,15 +377,6 @@
     <ClInclude Include="Source\StageObject\Block\BlockParameter.h">
       <Filter>Source\StageObject\Block</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Collision\CollisionSlope.h">
-      <Filter>Source\Collision</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\StageObject\Slope\Slope.h">
-      <Filter>Source\StageObject\Slope</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\StageObject\Slope\SlopeParameter.h">
-      <Filter>Source\StageObject\Slope</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Collision\CollisionOBB.h">
       <Filter>Source\Collision</Filter>
     </ClInclude>
@@ -260,9 +395,6 @@
     <ClInclude Include="Source\Camera\FollowCameraStrategy.h">
       <Filter>Source\Camera</Filter>
     </ClInclude>
-    <ClInclude Include="Source\State\PlayerStateAttack.h">
-      <Filter>Source\State</Filter>
-    </ClInclude>
     <ClInclude Include="Source\State\PlayerStateBase.h">
       <Filter>Source\State</Filter>
     </ClInclude>
@@ -278,5 +410,145 @@
     <ClInclude Include="Source\State\PlayerStateMove.h">
       <Filter>Source\State</Filter>
     </ClInclude>
+    <ClInclude Include="Source\State\PlayerStateAirAttack.h">
+      <Filter>Source\State</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\State\PlayerStateGroundAttack.h">
+      <Filter>Source\State</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\State\PlayerStateFall.h">
+      <Filter>Source\State</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\State\PlayerStateHover.h">
+      <Filter>Source\State</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\State\PlayerStateDashAttack.h">
+      <Filter>Source\State</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Animation\AnimationController.h">
+      <Filter>Source\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MyEffekseer\Effekseer.h">
+      <Filter>Source\MyEffekseer</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MyEffekseer\EffekseerManager.h">
+      <Filter>Source\MyEffekseer</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GameSetting\Color.h">
+      <Filter>Source\GameSetting</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ParameterData\AttackDataManager.h">
+      <Filter>Source\ParameterData</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ParameterData\AttackParameter.h">
+      <Filter>Source\ParameterData</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ParameterData\PlayerParameter.h">
+      <Filter>Source\ParameterData</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ParameterData\PlayerDataManager.h">
+      <Filter>Source\ParameterData</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ShadowMap\ShadowMap.h">
+      <Filter>Source\ShadowMap</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Physics\Gravity.h">
+      <Filter>Source\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ObjectPool\ObjectPool.h">
+      <Filter>Source\ObjectPool</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Character\CharacterBase.h">
+      <Filter>Source\Character</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Enemy\EnemyBase.h">
+      <Filter>Source\Enemy</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Enemy\EnemyManager.h">
+      <Filter>Source\Enemy</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Enemy\NormalEnemy.h">
+      <Filter>Source\Enemy</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\State\PlayerStateDead.h">
+      <Filter>Source\State</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\EnemyAI\BehaviorTree\BehaviorTree.h">
+      <Filter>Source\EnemyAI\BehaviorTree</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\EnemyAI\Blackboard\BlackBoard.h">
+      <Filter>Source\EnemyAI\Blackboard</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\EnemyAI\Composite\CompositeNodeBase.h">
+      <Filter>Source\EnemyAI\Composite</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\EnemyAI\Composite\Selector.h">
+      <Filter>Source\EnemyAI\Composite</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\EnemyAI\Composite\Sequence.h">
+      <Filter>Source\EnemyAI\Composite</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\EnemyAI\Core\INode.h">
+      <Filter>Source\EnemyAI\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\EnemyAI\Core\NodeBase.h">
+      <Filter>Source\EnemyAI\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\EnemyAI\Core\NodeResult.h">
+      <Filter>Source\EnemyAI\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\EnemyAI\Leaf\ChasePlayer.h">
+      <Filter>Source\EnemyAI\Leaf</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\EnemyAI\Leaf\IsPlayerDetected.h">
+      <Filter>Source\EnemyAI\Leaf</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\EnemyAI\Leaf\LeafNodeBase.h">
+      <Filter>Source\EnemyAI\Leaf</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\EnemyAI\Leaf\Roam.h">
+      <Filter>Source\EnemyAI\Leaf</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\EnemyAI\Leaf\ReturnToBase.h">
+      <Filter>Source\EnemyAI\Leaf</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\EnemyAI\BuildTree\NormalEnemyTree.h">
+      <Filter>Source\EnemyAI\BuildTree</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Library\json\json.hpp">
+      <Filter>Source\Library\json</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\StageObject\Ground\Ground.h">
+      <Filter>Source\StageObject\Ground</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\StageObject\Ground\GroundParameter.h">
+      <Filter>Source\StageObject\Ground</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\StageObject\Prop\Prop.h">
+      <Filter>Source\StageObject\Prop</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\StageObject\Prop\PropParameter.h">
+      <Filter>Source\StageObject\Prop</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Attack\AttackComponent.h">
+      <Filter>Source\Attack</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\EnemyAI\Leaf\AttackPlayer.h">
+      <Filter>Source\EnemyAI\Leaf</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Animation\PlayerAnimParam.h">
+      <Filter>Source\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Animation\NormalEnemyAnimParam..h">
+      <Filter>Source\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GameTime\GameTime.h">
+      <Filter>Source\GameTime</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Source\ToDo">
+      <Filter>Source</Filter>
+    </None>
   </ItemGroup>
 </Project>

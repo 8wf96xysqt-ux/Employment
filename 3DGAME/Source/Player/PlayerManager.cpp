@@ -6,9 +6,9 @@ PlayerManager* PlayerManager::m_Instance = nullptr;
 
 // コンストラクタ
 PlayerManager::PlayerManager()
-{
 	// 生成されていなければnullptr
-	m_Player = nullptr;
+	:m_Player(nullptr)
+{
 }
 
 // デストラクタ
@@ -20,6 +20,7 @@ PlayerManager::~PlayerManager()
 
 void PlayerManager::CreatePlayer()
 {
+
 	// プレイヤーが生成されていなければ生成する
 	if (!m_Player)
 	{
@@ -75,11 +76,18 @@ void PlayerManager::Draw()
 	}
 }
 
+void PlayerManager::DrawDebug()
+{
+	if (m_Player)
+	{
+		m_Player->DrawDebug();
+	}
+}
+
 void PlayerManager::Fin()
 {
 	if (m_Player)
 	{
-		m_Player->Fin();
 		delete m_Player;
 		m_Player = nullptr;
 	}

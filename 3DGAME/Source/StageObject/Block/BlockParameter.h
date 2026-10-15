@@ -1,7 +1,5 @@
-#pragma once
-
 enum BlockID
 {
-	BLOCK_00,
-	BLOCK_MAX
+    BLOCK_MODEL_00,
+    BLOCK_MODEL_MAX
 };

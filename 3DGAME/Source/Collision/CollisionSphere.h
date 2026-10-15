@@ -2,6 +2,8 @@
 
 #include "DxLib.h"
 
+class CollisionOBB;
+
 class CollisionSphere
 {
 public:
@@ -16,12 +18,15 @@ public:
 	void SetLocalPos(VECTOR localPos) { m_LocalPos = localPos; }
 	void SetRadius(float radius) { m_Radius = radius; }
 
-	VECTOR GetTargetPos() { return *m_TargetPos; }
-	VECTOR GetLocalPos() { return m_LocalPos; }
-	float GetRadius() { return m_Radius; }
+	VECTOR GetTargetPos() const { return *m_TargetPos; }
+	VECTOR GetLocalPos() const { return m_LocalPos; }
+	float GetRadius() const { return m_Radius; }
+
 
 public:
 	bool CheckSphere(CollisionSphere* other);
+	// Sphere Å~ OBB
+	bool CheckOBB(const CollisionOBB* obb) const;
 
 private:
 	// ëŒè€ÇÃç¿ïW

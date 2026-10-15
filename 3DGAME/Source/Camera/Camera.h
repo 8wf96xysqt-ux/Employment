@@ -1,10 +1,10 @@
 #pragma once
 #include "DxLib.h"
 #include <vector>
-#include <memory> 
+#include <memory>
 
 class Player;
-class CameraStrategy; 
+class CameraStrategy;
 
 // カメラクラス
 class Camera
@@ -12,6 +12,7 @@ class Camera
 public:
 	Camera();
 	~Camera();
+
 public:
 	void Init();
 	void Load();
@@ -22,7 +23,7 @@ public:
 	void Fin();
 	float GetYaw() const { return m_Rot.y; }
 
-public: 
+public:
 	// カメラの挙動（戦略）を動的に切り替える
 	void SetStrategy(std::unique_ptr<CameraStrategy> strategy);
 
@@ -36,6 +37,9 @@ public:
 	VECTOR GetTarget() const { return m_Target; }
 	void SetTarget(const VECTOR& target) { m_Target = target; }
 
+	VECTOR GetRaycastTarget() const { return m_RaycastTarget; }
+	void SetRaycastTarget(const VECTOR& target) { m_RaycastTarget = target; }
+
 	VECTOR GetUpVec() const { return m_UpVec; }
 	void SetUpVec(const VECTOR& upVec) { m_UpVec = upVec; }
 
@@ -46,20 +50,30 @@ public:
 	float GetTargetYaw() const { return m_TargetYaw; }
 	void SetTargetYaw(float yaw) { m_TargetYaw = yaw; }
 
+	// カメラシェイク開始
+	void StartShake(float power, float duration);
+
 private:
 	float UpdateOcclusion();
 	VECTOR CalcPulledCameraPos(const VECTOR& target, const VECTOR& idealPos, float nearestT) const;
 
 private:
-	std::unique_ptr<CameraStrategy> m_Strategy; // 現在のカメラ戦略を保持
+	std::unique_ptr<CameraStrategy> m_Strategy;
 
 	VECTOR m_Pos;
 	VECTOR m_Rot;
+	// 実際にカメラが見る注視点
 	VECTOR m_Target;
+	// レイキャスト専用の注視点
+	VECTOR m_RaycastTarget;
 	VECTOR m_UpVec;
 	VECTOR m_IdealPos;
 	Player* m_TargetPlayer;
 	int m_DebugHitCount = 0;
 	float m_TargetYaw;
 	bool m_AutoRotate = false;
+	// カメラシェイク
+	float m_ShakeTime;
+	float m_ShakeDuration;
+	float m_ShakePower;
 };

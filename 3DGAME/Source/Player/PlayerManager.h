@@ -12,20 +12,34 @@ public:
 	// PlayerManagerはゲーム上に１つのみとするので
 	// ２回目以降はnewが通らないようになっている
 	// （デザインパターン：シングルトン）
-	static void CreateInstance() { if (!m_Instance) m_Instance = new PlayerManager; }
+	static void CreateInstance()
+	{
+		if (!m_Instance)
+		{
+			m_Instance = new PlayerManager;
+		}
+	}
 	// マネージャーの関数が呼びたいときに使用する、マネージャー取得関数
 	static PlayerManager* GetInstance() { return m_Instance; }
 	// 使わなくなったら削除する際の削除関数
-	static void DeleteInstance() { if (m_Instance) delete m_Instance; m_Instance = nullptr; }
+	static void DeleteInstance()
+	{
+		if (m_Instance)
+		{
+			delete m_Instance;
+			m_Instance = nullptr;
+		}
+	}
 
 public:
-	void Init();	// 初期化
-	void Load();	// ロード
-	void Start();	// 開始
-	void Step();	// ステップ
-	void Update();	// 更新
-	void Draw();	// 描画
-	void Fin();		// 終了
+	void Init();	 // 初期化
+	void Load();	 // ロード
+	void Start();	 // 開始
+	void Step();	 // ステップ
+	void Update();	 // 更新
+	void Draw();	 // 描画
+	void DrawDebug();//デバック
+	void Fin();		 // 終了
 
 public:
 	// プレイヤーを生成する

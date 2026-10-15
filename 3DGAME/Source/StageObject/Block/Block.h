@@ -9,4 +9,6 @@ public:
 	void Start() override;
 	StageObject* Clone() override;
 	bool IsOcclusionTarget() override { return true; }
+	bool IsCameraCollisionTarget() const override{return true;}
+	bool IsPathfindingTarget() const override{ return true; }
 };

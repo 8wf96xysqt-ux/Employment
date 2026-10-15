@@ -14,10 +14,14 @@ public:
 	virtual StageObject* Clone() = 0;
 	CollisionAABB* GetAABB() const { return m_AABB; }
 	void SetTransform(VECTOR pos, VECTOR rot, VECTOR scale) { m_Pos = pos; m_Rot = rot; m_Scale = scale; }
-
+	//“§–¾‰»‚Ì‘ÎÛ‚©
 	virtual bool IsOcclusionTarget() { return false; }
+	// ƒJƒƒ‰ˆÊ’u’²®‚Ì‘ÎÛ‚©
+	virtual bool IsCameraCollisionTarget() const{ return false; }
 	void SetTransparency(float alpha) { m_TargetAlpha = alpha; }
 	float GetTransparency() const { return m_Alpha; }
+	// “G‚ÌŒo˜H’Tõ‚ÅáŠQ•¨‚Æ‚µ‚Äˆµ‚¤‚©
+	virtual bool IsPathfindingTarget() const{ return false; }
 
 protected:
 	int m_Handle;

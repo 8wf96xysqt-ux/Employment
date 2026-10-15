@@ -1,4 +1,5 @@
 #pragma once
 
-#define SCREEN_WIDTH 1600
-#define SCREEN_HEIGHT 900
+// âÊñ ÉTÉCÉY
+static constexpr int SCREEN_WIDTH = 1600;
+static constexpr int SCREEN_HEIGHT = 900;

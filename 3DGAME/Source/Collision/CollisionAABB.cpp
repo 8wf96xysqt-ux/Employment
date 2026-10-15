@@ -1,14 +1,16 @@
 ﻿#include "DxLib.h"
 #include "CollisionAABB.h"
+#include "CollisionSphere.h"
+#include "CollisionOBB.h"
 #include "../MyMath/MyMath.h"
 #include <type_traits>
 #include <corecrt_math.h>
 // コンストラクタ
 CollisionAABB::CollisionAABB()
+	:m_TargetPos(nullptr)
+	,m_LocalPos(VGet(0.0f, 0.0f, 0.0f))
+	,m_Size(VGet(0.0f, 0.0f, 0.0f))
 {
-	m_TargetPos = nullptr;
-	m_LocalPos = VGet(0.0f, 0.0f, 0.0f);
-	m_Size = VGet(0.0f, 0.0f, 0.0f);
 }
 // デストラクタ
 CollisionAABB::~CollisionAABB()
@@ -66,6 +68,167 @@ bool CollisionAABB::CheckAABB(const CollisionAABB* other) const
 	// いずれかの軸で重なっていないので当たっていない
 	return false;
 }
+bool CollisionAABB::CheckSphere(const CollisionSphere* sphere) const
+{
+	VECTOR centerPos = MyMath::VecAdd(*m_TargetPos, m_LocalPos);
+
+	VECTOR sphereCenter =
+		MyMath::VecAdd(sphere->GetTargetPos(), sphere->GetLocalPos());
+
+	float radius = sphere->GetRadius();
+
+	// AABBの最小・最大座標
+	float minX = centerPos.x - m_Size.x * 0.5f;
+	float maxX = centerPos.x + m_Size.x * 0.5f;
+
+	float minY = centerPos.y - m_Size.y * 0.5f;
+	float maxY = centerPos.y + m_Size.y * 0.5f;
+
+	float minZ = centerPos.z - m_Size.z * 0.5f;
+	float maxZ = centerPos.z + m_Size.z * 0.5f;
+
+	// Sphereの中心からAABB上で一番近い点を求める
+	float closestX = sphereCenter.x;
+	float closestY = sphereCenter.y;
+	float closestZ = sphereCenter.z;
+
+	if (closestX < minX)
+		closestX = minX;
+	else if (closestX > maxX)
+		closestX = maxX;
+
+	if (closestY < minY)
+		closestY = minY;
+	else if (closestY > maxY)
+		closestY = maxY;
+
+	if (closestZ < minZ)
+		closestZ = minZ;
+	else if (closestZ > maxZ)
+		closestZ = maxZ;
+
+	// Sphere中心から最近接点までの距離の2乗
+	float dx = sphereCenter.x - closestX;
+	float dy = sphereCenter.y - closestY;
+	float dz = sphereCenter.z - closestZ;
+
+	float distanceSq = dx * dx + dy * dy + dz * dz;
+
+	// 半径以内なら衝突
+	return distanceSq <= radius * radius;
+}
+
+bool CollisionAABB::CheckOBB(const CollisionOBB* obb) const
+{
+	// AABBの中心座標
+	VECTOR posA =
+		MyMath::VecAdd(*m_TargetPos, m_LocalPos);
+
+	// OBBの中心座標
+	VECTOR posB =MyMath::VecAdd(obb->GetTargetPos(),obb->GetLocalPos());
+
+	// AABBの軸
+	VECTOR axisA[2];
+
+	// X軸
+	axisA[0] = VGet(1.0f, 0.0f, 0.0f);
+
+	// Z軸
+	axisA[1] = VGet(0.0f, 0.0f, 1.0f);
+
+
+	// OBBの軸
+	VECTOR axisB[2];
+
+	float s = sinf(obb->GetRotation());
+	float c = cosf(obb->GetRotation());
+
+	// OBBのX軸
+	axisB[0] = VGet(c, 0.0f, s);
+
+	// OBBのZ軸
+	axisB[1] = VGet(-s, 0.0f, c);
+
+
+	// 中心間の距離
+	VECTOR distance =
+		MyMath::VecSub(posB, posA);
+
+
+	// 分離軸
+	// AABB X
+	// AABB Z
+	// OBB X
+	// OBB Z
+	VECTOR axes[4];
+
+	axes[0] = axisA[0];
+	axes[1] = axisA[1];
+	axes[2] = axisB[0];
+	axes[3] = axisB[1];
+
+
+	for (int i = 0; i < 4; i++)
+	{
+		VECTOR axis = axes[i];
+
+		// 中心間距離を軸に投影
+		float distanceProjection =fabsf(distance.x * axis.x +distance.z * axis.z);
+
+
+		// AABBの半サイズ
+		float halfAX = m_Size.x * 0.5f;
+		float halfAZ = m_Size.z * 0.5f;
+
+
+		// AABBを軸に投影した幅
+		float a = halfAX * fabsf(axis.x) + halfAZ * fabsf(axis.z);
+
+
+		// OBBの半サイズ
+		VECTOR obbSize = obb->GetSize();
+
+		float halfBX = obbSize.x * 0.5f;
+		float halfBZ = obbSize.z * 0.5f;
+
+
+		// OBBを軸に投影した幅
+		float b = 
+			halfBX * fabsf(axisB[0].x * axis.x +axisB[0].z * axis.z)
+			+
+			halfBZ *fabsf(axisB[1].x * axis.x +axisB[1].z * axis.z);
+
+
+		// この軸上で離れていたら衝突していない
+		if (distanceProjection > a + b)
+		{
+			return false;
+		}
+	}
+
+
+	// Y方向の判定
+	float topA = posA.y + m_Size.y * 0.5f;
+
+	float bottomA = posA.y - m_Size.y * 0.5f;
+
+
+	float topB = posB.y + obb->GetSize().y * 0.5f;
+
+	float bottomB = posB.y - obb->GetSize().y * 0.5f;
+
+
+	// Y方向で離れている
+	if (bottomA > topB || topA < bottomB)
+	{
+		return false;
+	}
+
+
+	// すべての軸で分離していない
+	return true;
+}
+
 // 当たったかどうかだけを返す
 bool CollisionAABB::CheckRayHit(VECTOR rayStart, VECTOR rayEnd) const
 {

@@ -20,6 +20,7 @@ public:
 	// 使わなくなったら削除する際の削除関数
 	static void DeleteInstance() { if (m_Instance) delete m_Instance; m_Instance = nullptr; }
 
+
 public:
 	void Init();	// 初期化
 	void Load();	// ロード
@@ -40,6 +41,8 @@ public:
 	//カメラ切り替え
 	void SetFollowCamera();
 	void Set2DCamera();
+	// カメラシェイク開始
+	void StartShake(float power, float duration);
 
 private:
 	// 生成されたCameraManager自身を格納する変数

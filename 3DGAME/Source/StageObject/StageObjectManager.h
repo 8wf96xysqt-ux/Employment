@@ -4,10 +4,12 @@
 
 class StageObject;
 class Floor;
+class Ground;
 class Block;
-class Slope;
+class Prop;
 
-// プレイヤーオブジェクト管理クラス
+
+// ステージオブジェクト管理クラス
 class StageObjectManager
 {
 public:
@@ -29,21 +31,27 @@ public:
 	Floor* CreateFloor(int id);
 	Floor* CreateFloor(int id, VECTOR pos, VECTOR rot, VECTOR scale);
 
+	// 地面を生成する
+	Ground* CreateGround(int id);
+	Ground* CreateGround(int id, VECTOR pos, VECTOR rot, VECTOR scale);
+
 	// ブロックを生成する
 	Block* CreateBlock(int id);
 	Block* CreateBlock(int id, VECTOR pos, VECTOR rot, VECTOR scale);
 
-	//Slopeを生成する
-	Slope* CreateSlope(int id);
-	Slope* CreateSlope(int id, VECTOR pos, VECTOR rot, VECTOR scale);
+	//小道具を生成する
+	Prop* CreateProp(int id);
+	Prop* CreateProp(int id, VECTOR pos, VECTOR rot, VECTOR scale);
 
-	// 管理中のプレイヤーを取得する
+	// 管理中のステージオブジェクトを取得する
 	std::vector<StageObject*> GetStageObjects() { return m_StageObjects; }
 
 private:
 	static StageObjectManager* m_Instance;
 	std::vector<StageObject*> m_StageObjects;
+
 	Floor* m_OriginalFloors;
+	Ground* m_OriginalGround;
 	Block* m_OriginalBlocks;
-	Slope* m_OriginalSlopes;
+	Prop* m_OriginalProp;
 };

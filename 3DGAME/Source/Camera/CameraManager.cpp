@@ -6,9 +6,10 @@ CameraManager* CameraManager::m_Instance = nullptr;
 
 // コンストラクタ
 CameraManager::CameraManager()
-{
+
 	// 生成されていなければnullptr
-	m_Camera = nullptr;
+	:m_Camera(nullptr)
+{
 }
 
 // デストラクタ
@@ -41,6 +42,13 @@ void CameraManager::Set2DCamera()
 	{
 		m_Camera->SetStrategy(std::make_unique<Camera2DStrategy>());
 	}
+}
+
+void CameraManager::StartShake(float power, float duration)
+{
+	if (!m_Camera) return;
+
+	m_Camera->StartShake(power, duration);
 }
 
 void CameraManager::Init()
