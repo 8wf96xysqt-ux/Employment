@@ -413,102 +413,32 @@ void Player::Respawn()
     StageManager::GetInstance()->ResetEnemies();
 
 }
-// ステージ当たり判定
+
 void Player::CheckHitStageObjects(const std::vector<StageObject*>& objects)
 {
-    // X
-    m_Pos.x += m_Move.x * TARGET_FPS * FPSSystem::GetDeltaTime();
+	m_Pos.x += m_Move.x * TARGET_FPS * FPSSystem::GetDeltaTime();
 
-    for (auto obj : objects)
-    {
-        const CollisionAABB* objAABB = obj->GetAABB();
-
-        if (!objAABB)
-        {
-            continue;
-        }
-
-        if (m_AABB->CheckAABB(objAABB))
-        {
-            m_Pos.x = m_PrevPos.x;
-        }
-    }
-
-    bool wasGround = m_IsGround;
-
-    bool hitGround = false;
-
-    float moveY = m_Move.y * TARGET_FPS * FPSSystem::GetDeltaTime();
-
-    m_Pos.y += moveY;
-
-    for (auto obj : objects)
-    {
-        const CollisionAABB* objAABB = obj->GetAABB();
-
-        if (!objAABB)
-        {
-            continue;
-        }
-
-        if (m_AABB->CheckAABB(objAABB))
-        {
-            m_Pos.y = m_PrevPos.y;
-            m_Move.y = 0.0f;
-
-            // 下方向に移動していた場合だけ着地
-            if (moveY < 0.0f)
-            {
-                hitGround = true;
-            }
-        }
-    }
-
-    if (hitGround)
-    {
-        m_IsGround = true;
-
-        // 着地したのでコヨーテタイム終了
-        m_CoyoteTime = 0.0f;
-
-        m_AttackComponent.SetHasAirAttacked(false);
-
-        m_LastGroundY = m_Pos.y;
-    }
-
-    else
-    {
-        m_IsGround = false;
-
-        // 地面から離れた瞬間だけコヨーテタイム開始
-        if (wasGround)
-        {
-            m_CoyoteTime = m_CoyoteTimeMax;
-        }
-        else if (m_CoyoteTime > 0.0f)
-        {
-            m_CoyoteTime -= FPSSystem::GetDeltaTime();
-        }
-    }
-
-    // Z
-    m_Pos.z += m_Move.z * TARGET_FPS * FPSSystem::GetDeltaTime();
-
-    for (auto obj : objects)
-    {
-        const CollisionAABB* objAABB = obj->GetAABB();
-
-        if (!objAABB)
-        {
-            continue;
-        }
-
-        if (m_AABB->CheckAABB(objAABB))
-        {
-            m_Pos.z = m_PrevPos.z;
-        }
-    }
+    // 共通処理に委譲（OnLand/OnLeaveGround は自動で呼ばれる）
+    ResolveStageCollisions(objects, FPSSystem::GetDeltaTime());
 }
+
+// ステージ当たり判定
+void Player::OnLand()
+{
+    // 着地したのでコヨーテタイム終了
+    m_CoyoteTime = 0.0f;
+
+    m_AttackComponent.SetHasAirAttacked(false);
+
+    m_LastGroundY = m_Pos.y;
+}
+
+void Player::OnLeaveGround()
+{
+    // 地面を離れた瞬間の処理（コヨーテ開始）
+    m_CoyoteTime = m_CoyoteTimeMax;
+}
+
 
 bool Player::CheckAttackHit(CollisionAABB* target)
 {

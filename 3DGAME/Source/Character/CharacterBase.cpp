@@ -223,3 +223,75 @@ void CharacterBase::SetGround(bool value)
     m_IsGround = value;
 }
 
+// 共通衝突解決: 軸分離で X/Y/Z を順に処理し、着地/離地イベントを通知する
+bool CharacterBase::ResolveStageCollisions(const std::vector<StageObject*>& objects, float deltaTime)
+{
+    if (!m_AABB) return false;
+
+    bool wasGround = m_IsGround;
+    bool hitGround = false;
+
+    // X
+    m_Pos.x += m_Move.x * TARGET_FPS * deltaTime;
+    for (auto obj : objects)
+    {
+        const CollisionAABB* objAABB = obj ? obj->GetAABB() : nullptr;
+        if (!objAABB) continue;
+        if (m_AABB->CheckAABB(objAABB))
+        {
+            m_Pos.x = m_PrevPos.x;
+            break;
+        }
+    }
+
+    // Y
+    float moveY = m_Move.y * TARGET_FPS * deltaTime;
+    m_Pos.y += moveY;
+    for (auto obj : objects)
+    {
+        const CollisionAABB* objAABB = obj ? obj->GetAABB() : nullptr;
+        if (!objAABB) continue;
+        if (m_AABB->CheckAABB(objAABB))
+        {
+            m_Pos.y = m_PrevPos.y;
+            m_Move.y = 0.0f;
+            if (moveY < 0.0f)
+            {
+                hitGround = true;
+            }
+            break;
+        }
+    }
+
+    // Z
+    m_Pos.z += m_Move.z * TARGET_FPS * deltaTime;
+    for (auto obj : objects)
+    {
+        const CollisionAABB* objAABB = obj ? obj->GetAABB() : nullptr;
+        if (!objAABB) continue;
+        if (m_AABB->CheckAABB(objAABB))
+        {
+            m_Pos.z = m_PrevPos.z;
+            break;
+        }
+    }
+
+    // フラグ更新と通知
+    if (hitGround && !wasGround)
+    {
+        m_IsGround = true;
+        OnLand();
+    }
+    else if (!hitGround && wasGround)
+    {
+        m_IsGround = false;
+        OnLeaveGround();
+    }
+    else
+    {
+        m_IsGround = hitGround;
+    }
+
+    return hitGround;
+}
+

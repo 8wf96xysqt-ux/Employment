@@ -83,6 +83,10 @@ public:
     // ダメージ処理
     void TakeDamage(int damage) override;
 
+    // 着地／離地フックのオーバーライド
+    void OnLand() override;
+    void OnLeaveGround() override;
+
     // リスポーン地点
     void SetRespawnPoint(VECTOR pos, VECTOR rot);
     VECTOR GetRespawnPoint() const;
