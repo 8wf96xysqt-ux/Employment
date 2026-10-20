@@ -32,6 +32,9 @@ public:
     // 外部のAI（Roamノード等）から移動制御を行うための関数（宣言のみ）
     void UpdateMovementPattern();
     void SetBasePos(VECTOR pos);
+
+    // アニメーション再生
+    virtual void PlayAnimation(int anim, bool isLoop, float speed) = 0;
 protected:
     // 内部制御関数
     void StartKnockback(const VECTOR& direction, float power);
@@ -53,6 +56,11 @@ protected:
     float m_Angle = 0.0f;
     int m_TargetPointIdx = 0;
     float m_MovementSpeed = 0.1f;
+
+    // 移動タイミング制御
+    float m_MoveWaitTime = 0.0f;
+    float m_MoveTimer = 0.0f;
+    bool m_IsMoveWaiting = true;
 
 
     bool m_IsDeathAnimationStarted = false;

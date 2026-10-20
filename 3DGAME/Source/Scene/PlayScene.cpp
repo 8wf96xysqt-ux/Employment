@@ -4,6 +4,7 @@
 #include "../Input/Input.h"
 #include "../Collision/CollisionManager.h"
 #include "../Player/PlayerManager.h"
+#include "../Player/Player.h"
 #include "../Camera/CameraManager.h"
 #include "../Stage/StageManager.h"
 #include "../StageObject/StageObjectManager.h"
@@ -148,6 +149,17 @@ void PlayScene::Update()
 
 	// プレイヤー更新
 	PlayerManager::GetInstance()->Update();
+
+	// プレイヤーが復活したら敵を再配置
+	Player* player = PlayerManager::GetInstance()->GetPlayer();
+
+	if (player != nullptr && player->HasRespawned())
+	{
+		StageManager::GetInstance()->ResetEnemies();
+		player->ResetRespawned();
+	}
+
+
 
 	// エネミー更新
 	EnemyManager::GetInstance()->Update();

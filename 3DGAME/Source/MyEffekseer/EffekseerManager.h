@@ -6,7 +6,7 @@
 class EffekseerEffect;
 
 #define EFFEKSEER_MAX_PARTICLE 2000
-#define EFFEKSEER_EFFECT_MAX 1000
+#define EFFEKSEER_EFFECT_MAX 10
 
 enum EffekseerEffectType
 {

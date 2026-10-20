@@ -82,11 +82,7 @@ void AnimationController::Update()
         return;
     }
 
-    MV1SetAttachAnimTime(
-        m_ModelHandle,
-        m_AnimationAttachIndex,
-        m_AnimationNowTime
-    );
+    MV1SetAttachAnimTime(m_ModelHandle,m_AnimationAttachIndex,m_AnimationNowTime);
 
     // ƒQ[ƒ€‘S‘Ì‚ÌŠÔ”{—¦‚ğ”½‰f
     m_AnimationNowTime +=

@@ -3,8 +3,9 @@
 #include "PlayerStateAirAttack.h"
 #include "PlayerStateHover.h"
 #include "PlayerStateFall.h"
+#include "../Movement/PlayerAirMovement.h"
 #include "../Input/Input.h"
-#include "../MyMath/MyMath.h"
+#include "../FPS/FPS.h"
 #include "../ParameterData/PlayerDataManager.h"
 
 PlayerStateJump::PlayerStateJump()
@@ -26,13 +27,15 @@ void PlayerStateJump::Enter(Player* player)
 
     m_pPlayer->SetGround(false);
 
-    m_pPlayer->PlayAnimation(PLAYER_ANIMATION_DASHJUMP,true,m_PlayerData->animSpeedDashJump);
+    m_pPlayer->PlayAnimation(
+        PLAYER_ANIMATION_DASHJUMP,
+        true,
+        m_PlayerData->animSpeedDashJump);
 }
 
 void PlayerStateJump::Update()
 {
     Player* player = m_pPlayer;
-    VECTOR move = player->GetMove();
 
     // 空中攻撃
     if (Input::IsAttack() && !player->GetAttackComponent()->HasAirAttacked())
@@ -41,54 +44,44 @@ void PlayerStateJump::Update()
         return;
     }
 
-   
+    // ホバー遷移
     if (Input::IsTriggerJump() && !player->HasHovered())
     {
         player->SetHasHovered(true);
         ChangeState(std::make_unique<PlayerStateHover>());
         return;
     }
-    
 
     // 空中移動
-    VECTOR airMove = player->GetCameraMoveInput();
-    float length = MyMath::VecLong(airMove);
+    PlayerAirMovement::Update(
+        player,
+        m_PlayerData->airMoveSpeed,
+        m_PlayerData->moveInputThreshold);
 
-    if (length > m_PlayerData->moveInputThreshold)
-    {
-        airMove = MyMath::VecNormalize(airMove);
-        move.x = airMove.x * m_PlayerData->airMoveSpeed;
-        move.z = airMove.z * m_PlayerData->airMoveSpeed;
-        player->SetTargetYaw(atan2f(airMove.x, airMove.z));
-        player->DirectionRot();
-    }
-    else 
-    {
-        move.x = 0.0f;
-        move.z = 0.0f;
-    }
+    VECTOR move = player->GetMove();
 
     // 可変ジャンプ
-    if (Input::IsJump()) 
+    if (Input::IsJump())
     {
-        move.y += m_PlayerData->jumpHoldPower * TARGET_FPS * FPSSystem::GetDeltaTime();
+        move.y += m_PlayerData->jumpHoldPower
+            * TARGET_FPS
+            * FPSSystem::GetDeltaTime();
     }
-    else 
+    else
     {
-        if (move.y > 0) 
+        if (move.y > 0.0f)
         {
             move.y *= m_PlayerData->jumpCutRate;
         }
     }
+
     player->SetMove(move);
 
-   
     // 落下
-    if (move.y <= 0) 
-    { 
+    if (move.y <= 0.0f)
+    {
         ChangeState(std::make_unique<PlayerStateFall>());
     }
-  
 }
 
 void PlayerStateJump::Exit()

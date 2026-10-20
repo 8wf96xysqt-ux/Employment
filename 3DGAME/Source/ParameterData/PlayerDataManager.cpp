@@ -48,6 +48,7 @@ void PlayerDataManager::Load()
 
         try
         {
+
             float data = std::stof(value);
 
             if (name == "MoveSpeed")
@@ -84,6 +85,8 @@ void PlayerDataManager::Load()
                 m_PlayerData.hoverTime = data;
             else if (name == "HoverMoveSpeed")
                 m_PlayerData.hoverMoveSpeed = data;
+            else if (name == "MaxHp")
+                m_PlayerData.maxHP = data;
             else if (name == "Scale")
                 m_PlayerData.scale = data;
             else if (name == "AABBSizeX")

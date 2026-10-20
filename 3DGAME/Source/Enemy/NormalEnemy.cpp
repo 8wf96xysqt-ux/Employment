@@ -99,10 +99,13 @@ bool NormalEnemy::IsDeathAnimationFinished() const
     if (!IsDead()) return false;
     if (!m_PlayDeathAnimation) return true;
 
-    return m_Animation.GetCurrentAnimation() == NORMAL_ANIMATION_DIE
-        && m_Animation.IsFinished();
+    return m_Animation.GetCurrentAnimation() == NORMAL_ANIMATION_DIE && m_Animation.IsFinished();
 }
 
+void NormalEnemy::PlayAnimation(int anim, bool isLoop, float speed)
+{
+    m_Animation.Play(anim, isLoop, speed);
+}
 void NormalEnemy::Update()
 {
     if (IsDead())

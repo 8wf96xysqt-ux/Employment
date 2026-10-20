@@ -6,7 +6,7 @@
 #include "../../StageObject/StageObjectManager.h"
 #include "../../StageObject/StageObject.h"
 #include "../../Collision/CollisionAABB.h"
-#include "../../Enemy/NormalEnemy.h"
+#include "../../Animation/NormalEnemyAnimParam..h"
 
 constexpr float MOVE_SPEED = 0.055f;
 constexpr float ROTATE_SPEED = 0.08f;
@@ -17,8 +17,7 @@ constexpr float ENEMY_RADIUS = 0.5f;
 // ステージの障害物にレイが当たるか
 bool IsBlockedByStage(VECTOR start, VECTOR end)
 {
-    auto objects =
-        StageObjectManager::GetInstance()->GetStageObjects();
+    auto objects = StageObjectManager::GetInstance()->GetStageObjects();
 
     for (auto obj : objects)
     {
@@ -52,14 +51,9 @@ void ChasePlayer::Tick()
 {
     SetCurrentNode();
 
-    EnemyBase* enemy =
-        m_BlackBoard->GetValue<EnemyBase*>("Enemy");
+    EnemyBase* enemy = m_BlackBoard->GetValue<EnemyBase*>("Enemy");
 
-    Player* player =
-        m_BlackBoard->GetValue<Player*>("Player");
-
-    NormalEnemy* normalEnemy =
-        dynamic_cast<NormalEnemy*>(enemy);
+    Player* player = m_BlackBoard->GetValue<Player*>("Player");
 
     if (enemy == nullptr || player == nullptr)
     {
@@ -75,25 +69,11 @@ void ChasePlayer::Tick()
 
     float distance = MyMath::VecLong(direction);
 
+    // プレイヤーとほぼ同じ位置なら移動しない
     if (distance < 0.001f)
     {
         enemy->SetMove(VGet(0.0f, 0.0f, 0.0f));
-
-        if (distance < 0.001f)
-        {
-            enemy->SetMove(VGet(0.0f, 0.0f, 0.0f));
-
-            if (normalEnemy)
-            {
-                normalEnemy->PlayAnimation(
-                    NORMAL_ANIMATION_IDLE,
-                    true,
-                    1.0f);
-            }
-
-            m_NodeResult = NodeResult::Running;
-            return;
-        }
+        enemy->PlayAnimation(NORMAL_ANIMATION_IDLE, true, 1.0f);
 
         m_NodeResult = NodeResult::Running;
         return;
@@ -104,7 +84,7 @@ void ChasePlayer::Tick()
     VECTOR right = VGet(direction.z, 0.0f, -direction.x);
     VECTOR left = VScale(right, -1.0f);
 
-    VECTOR rayStart = VAdd(enemyPos, VGet(0.0f, RAY_HEIGHT, 0.0f));
+    VECTOR rayStart = VAdd(enemyPos,VGet(0.0f, RAY_HEIGHT, 0.0f));
 
     // 敵の幅を考慮した3本の前方レイ
     VECTOR centerEnd = VAdd(rayStart, VScale(direction, RAY_DISTANCE));
@@ -113,7 +93,7 @@ void ChasePlayer::Tick()
 
     VECTOR rightStart = VAdd(rayStart, VScale(right, ENEMY_RADIUS));
 
-    VECTOR leftEnd  =VAdd(leftStart, VScale(direction, RAY_DISTANCE));
+    VECTOR leftEnd = VAdd(leftStart, VScale(direction, RAY_DISTANCE));
 
     VECTOR rightEnd = VAdd(rightStart, VScale(direction, RAY_DISTANCE));
 
@@ -128,27 +108,17 @@ void ChasePlayer::Tick()
     if (frontHit)
     {
         // プレイヤー方向を少し残した斜め方向へ回避
-        VECTOR leftDiagonal =
-            MyMath::VecNormalize(
-                VAdd(direction, VScale(left, 1.0f)));
+        VECTOR leftDiagonal = MyMath::VecNormalize(VAdd(direction, VScale(left, 1.0f)));
 
-        VECTOR rightDiagonal =
-            MyMath::VecNormalize(
-                VAdd(direction, VScale(right, 1.0f)));
+        VECTOR rightDiagonal = MyMath::VecNormalize(VAdd(direction, VScale(right, 1.0f)));
 
-        VECTOR leftDiagonalEnd =
-            VAdd(rayStart,
-                VScale(leftDiagonal, RAY_DISTANCE));
+        VECTOR leftDiagonalEnd = VAdd(rayStart,VScale(leftDiagonal, RAY_DISTANCE));
 
-        VECTOR rightDiagonalEnd =
-            VAdd(rayStart,
-                VScale(rightDiagonal, RAY_DISTANCE));
+        VECTOR rightDiagonalEnd =VAdd(rayStart,VScale(rightDiagonal, RAY_DISTANCE));
 
-        bool leftBlocked =
-            IsBlockedByStage(rayStart, leftDiagonalEnd);
+        bool leftBlocked = IsBlockedByStage(rayStart, leftDiagonalEnd);
 
-        bool rightBlocked =
-            IsBlockedByStage(rayStart, rightDiagonalEnd);
+        bool rightBlocked = IsBlockedByStage(rayStart, rightDiagonalEnd);
 
         if (!leftBlocked)
         {
@@ -160,24 +130,8 @@ void ChasePlayer::Tick()
         }
         else
         {
+            // 左右どちらにも進めない
             enemy->SetMove(VGet(0.0f, 0.0f, 0.0f));
-
-            if (distance < 0.001f)
-            {
-                enemy->SetMove(VGet(0.0f, 0.0f, 0.0f));
-
-                if (normalEnemy)
-                {
-                    normalEnemy->PlayAnimation(
-                        NORMAL_ANIMATION_IDLE,
-                        true,
-                        1.0f);
-                }
-
-                m_NodeResult = NodeResult::Running;
-                return;
-            }
-
             m_NodeResult = NodeResult::Running;
             return;
         }
@@ -188,24 +142,11 @@ void ChasePlayer::Tick()
 
     enemy->RotateToward(targetYaw, ROTATE_SPEED);
 
-    VECTOR move = VGet(
-        moveDirection.x * MOVE_SPEED,
-        0.0f,
-        moveDirection.z * MOVE_SPEED
-    );
+    VECTOR move = VGet(moveDirection.x * MOVE_SPEED,0.0f,moveDirection.z * MOVE_SPEED);
 
     enemy->SetMove(move);
 
-    if (normalEnemy)
-    {
-        normalEnemy->PlayAnimation(
-            NORMAL_ANIMATION_DISCOVERY,
-            true,
-            0.8f);
-    }
+    enemy->PlayAnimation(NORMAL_ANIMATION_DISCOVERY,true,0.8f);
 
     m_NodeResult = NodeResult::Running;
-
 }
-
-

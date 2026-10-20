@@ -1,10 +1,14 @@
 #include "Roam.h"
 #include "../Blackboard/BlackBoard.h"
 #include "../../Enemy/EnemyBase.h"
-#include "../../Enemy/NormalEnemy.h"
-
+#include "../../Animation/NormalEnemyAnimParam..h"
 #include "../../MyMath/MyMath.h"
 #include <cmath>
+
+namespace
+{
+    constexpr float ROTATE_SPEED = 0.08f;
+}
 
 Roam::Roam(BlackBoard* blackBoard)
     : LeafNodeBase(blackBoard, "Roam")
@@ -20,7 +24,7 @@ void Roam::Tick()
     EnemyBase* enemy =
         m_BlackBoard->GetValue<EnemyBase*>("Enemy");
 
-    if (!enemy)
+    if (enemy == nullptr)
     {
         m_NodeResult = NodeResult::Fail;
         return;
@@ -31,35 +35,19 @@ void Roam::Tick()
 
     VECTOR move = enemy->GetMove();
 
-    NormalEnemy* normalEnemy = dynamic_cast<NormalEnemy*>(enemy);
-
     if (move.x != 0.0f || move.z != 0.0f)
     {
         // 移動方向へ回転
         float targetYaw = atan2f(move.x, move.z);
-
-        constexpr float ROTATE_SPEED = 0.08f;
         enemy->RotateToward(targetYaw, ROTATE_SPEED);
 
         // 移動中は歩行アニメーション
-        if (normalEnemy)
-        {
-            normalEnemy->PlayAnimation(
-                NORMAL_ANIMATION_WALK,
-                true,
-                1.0f);
-        }
+        enemy->PlayAnimation(NORMAL_ANIMATION_WALK,true,1.0f);
     }
     else
     {
         // 停止中は待機アニメーション
-        if (normalEnemy)
-        {
-            normalEnemy->PlayAnimation(
-                NORMAL_ANIMATION_IDLE,
-                true,
-                1.0f);
-        }
+        enemy->PlayAnimation(NORMAL_ANIMATION_IDLE,true,1.0f);
     }
 
     m_NodeResult = NodeResult::Running;

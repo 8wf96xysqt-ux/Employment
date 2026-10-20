@@ -100,12 +100,6 @@ namespace Input
     bool IsCameraRight();
     bool IsCameraReset();
 
-    // スキル
-    bool IsSkill1();
-    bool IsSkill2();
-    bool IsSkill3();
-    bool IsSkill4();
-
     // スティック
     float GetStickLX();
     float GetStickLY();

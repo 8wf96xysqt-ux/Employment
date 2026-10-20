@@ -283,30 +283,6 @@ namespace Input
         return IsTriggerKey(KEY_SPACE) || IsTriggerKey(KEY_PAD_R_PUSH);
     }
 
-
-    // スキル
-
-    bool IsSkill1()
-    {
-        return false;
-    }
-
-    bool IsSkill2()
-    {
-        return false;
-    }
-
-    bool IsSkill3()
-    {
-        return false;
-    }
-
-    bool IsSkill4()
-    {
-        return false;
-    }
-
-
     // スティック
 
     float GetStickLX()

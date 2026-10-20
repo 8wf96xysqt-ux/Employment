@@ -40,8 +40,7 @@ void PlayerStateDead::Update()
     GameTime::SetTimeScale(0.7f);
 
     // 死亡アニメーションが終了したらリスポーン
-    if (m_pPlayer->GetAnimationNowTime() >=
-        m_pPlayer->GetAnimationTotalTime())
+    if (m_pPlayer->GetAnimationNowTime() >= m_pPlayer->GetAnimationTotalTime())
     {
         m_IsRespawned = true;
         m_pPlayer->Respawn();

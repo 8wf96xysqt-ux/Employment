@@ -5,11 +5,15 @@
 #include "../Attack/AttackComponent.h"
 #include "../Input/Input.h"
 #include "../ParameterData/AttackDataManager.h"
+#include "../Movement/PlayerGroundMovement.h"
+#include "../ParameterData/PlayerDataManager.h"
+
+constexpr int MAX_DASH_ATTACK_COUNT = 3;
 
 PlayerStateDashAttack::PlayerStateDashAttack()
     : m_IsRightPunch(true)
-    , m_AttackBuffered(false)
     , m_AttackData(nullptr)
+    , m_PlayerData(nullptr)
 {
 }
 
@@ -18,12 +22,14 @@ void PlayerStateDashAttack::Enter(Player* player)
     m_pPlayer = player;
 
     m_IsRightPunch = true;
-    m_AttackBuffered = false;
+    m_AttackCombo.Start(MAX_DASH_ATTACK_COUNT);
+
+    m_PlayerData = PlayerDataManager::GetInstance()->GetParameter();
 
     // Dash1‚ğæ“¾
     m_AttackData = AttackDataManager::GetInstance()->GetAttackData(PlayerAttackType::DASH_1);
 
-    if (m_AttackData == nullptr)
+    if (m_AttackData == nullptr || m_PlayerData == nullptr)
     {
         ChangeState(std::make_unique<PlayerStateIdle>());
         return;
@@ -36,8 +42,9 @@ void PlayerStateDashAttack::Update()
 {
     Player* player = m_pPlayer;
 
-    // UŒ‚’†‚à“ü—Í•ûŒü‚ÖˆÚ“®E•ûŒü“]Š·
-    player->UpdateMove(m_AttackData->moveSpeed);
+  
+   // UŒ‚’†‚à“ü—Í•ûŒü‚ÖˆÚ“®E•ûŒü“]Š·
+    PlayerGroundMovement::Update(player,m_AttackData->moveSpeed,m_PlayerData->moveInputThreshold);
 
     // ƒ[ƒ‹‚ÅUŒ‚ƒLƒƒƒ“ƒZƒ‹
     if (Input::IsRolling())
@@ -49,7 +56,7 @@ void PlayerStateDashAttack::Update()
     // Ÿ‚ÌUŒ‚“ü—Í‚ğ—\–ñ
     if (Input::IsAttack())
     {
-        m_AttackBuffered = true;
+        m_AttackCombo.BufferInput();
     }
 
     float totalTime = player->GetAnimationTotalTime();
@@ -63,9 +70,9 @@ void PlayerStateDashAttack::Update()
     float rate = player->GetAnimationNowTime() / totalTime;
 
     // UŒ‚Œã”¼‚ÅŸ‚Ìƒpƒ“ƒ`
-    if (rate >= m_AttackData->chainRate && m_AttackBuffered)
+    if (m_AttackCombo.CanNextAttack(rate, m_AttackData->chainRate))
     {
-        m_AttackBuffered = false;
+        m_AttackCombo.Next();
 
         // ‰E ¨ ¶
         m_IsRightPunch = !m_IsRightPunch;
@@ -99,6 +106,7 @@ void PlayerStateDashAttack::Update()
 
 void PlayerStateDashAttack::Exit()
 {
+    m_AttackCombo.ClearBuffer();
     m_pPlayer->GetAttackComponent()->EndAttack();
 
     // UŒ‚I—¹‚É…•½•ûŒü‚ÌˆÚ“®‚ğ’â~

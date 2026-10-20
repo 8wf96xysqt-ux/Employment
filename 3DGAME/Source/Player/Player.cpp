@@ -1,4 +1,10 @@
 ﻿#include "Player.h"
+#include "../FPS/FPS.h"
+#include "../Input/Input.h"
+#include "../MyMath/MyMath.h"
+#include "../GameSetting/Color.h"
+#include "../Camera/CameraManager.h"
+#include "../ParameterData/PlayerDataManager.h"
 #include "../StageObject/StageObjectManager.h"
 #include "../Collision/CollisionManager.h"
 #include "../Collision/CollisionAABB.h"
@@ -6,14 +12,6 @@
 #include "../GameSetting/GameSetting.h"
 #include "../State/PlayerStateIdle.h"
 #include "../State/PlayerStateDead.h"
-#include "../Camera/CameraManager.h"
-#include "../GameSetting/Color.h"
-#include "../Input/Input.h"
-#include "../MyMath/MyMath.h"
-#include "../FPS/FPS.h"
-#include "../ParameterData/PlayerDataManager.h"
-#include "../Stage/StageManager.h"
-
 
 #include <math.h>
 
@@ -73,7 +71,6 @@ void Player::Init()
 
     m_AttackComponent.Init(&m_Pos);
 
-    m_CoyoteTime = 0.0f;
     m_CoyoteTimeMax = m_PlayerData->coyoteTime;
 
     m_JumpBufferTime = 0.0f;
@@ -84,6 +81,12 @@ void Player::Init()
 void Player::Load()
 {
     m_Handle = MV1LoadModel("Data/Player/MMP.x");
+    if (m_Handle == -1)
+    {
+
+        printf("Error: Failed to load model Data/Player/MMP.x\n");
+        m_Handle = -1;
+    }
 }
 
 // 開始
@@ -91,8 +94,8 @@ void Player::Start()
 {
 
     // HP初期化
-    m_HP = 3;
-    m_MaxHP = 3;
+    m_MaxHP = m_PlayerData->maxHP;
+    m_HP = m_MaxHP;
     m_IsDead = false;
 
     m_Pos = VGet(0.0f, 1.0f, 0.0f);
@@ -119,10 +122,10 @@ void Player::Step()
     {
         return;
     }
-     // Y座標が-5以下になったら死亡ステートへ遷移
+     // Y座標が-5以下になったら即死させる
     if (m_Pos.y <= -5.0f)
     {
-        TakeDamage(m_HP);
+        Kill();
         return;
     }
 
@@ -173,9 +176,7 @@ void Player::Update()
     m_Animation.Update();
 
     // 攻撃判定の更新
-    m_AttackComponent.Update(
-        m_Animation.GetNowTime(),
-        m_Rot.y);
+    m_AttackComponent.Update(m_Animation.GetNowTime(),m_Rot.y);
 }
 
 
@@ -234,6 +235,9 @@ void Player::DrawDebug()
     DrawFormatString(0, 140, Color::White(),
         "CoyoteTime : %.3f",
         GetCoyoteTime());
+    DrawFormatString(0, 260, Color::White(),
+        "CoyoteTimeMax : %.3f",
+        m_CoyoteTimeMax);
 
     DrawFormatString(0, 220, Color::White(),
         "InvincibleTime : %.3f",
@@ -242,6 +246,9 @@ void Player::DrawDebug()
     DrawFormatString(0, 240, Color::White(),
         "DeltaTime : %.4f",
         FPSSystem::GetDeltaTime());
+    DrawFormatString(0, 280, Color::White(),
+        "HP : %d / %d",
+        GetHP(), GetMaxHP());
 
     // Zバッファを元に戻す
     SetUseZBuffer3D(TRUE);
@@ -273,52 +280,10 @@ void Player::Fin()
     }
 }
 
-float Player::RotCap(float rot)
-{
-    while (rot < 0.0f)
-    {
-        rot += DX_TWO_PI_F;
-    }
-
-    while (rot >= DX_TWO_PI_F)
-    {
-        rot -= DX_TWO_PI_F;
-    }
-
-    return rot;
-}
-
 // 方向回転
 void Player::DirectionRot()
 {
     RotateToward(m_TargetYawValue,m_PlayerData->rotationSpeed);
-}
-
-// プレイヤーを移動させる
-bool Player::UpdateMove(float speed)
-{
-    VECTOR move = GetCameraMoveInput();
-
-    float inputLength = MyMath::VecLong(move);
-
-    if (inputLength <= m_PlayerData->moveInputThreshold)
-    {
-        m_Move.x = 0.0f;
-        m_Move.z = 0.0f;
-        return false;
-    }
-
-    move = MyMath::VecNormalize(move);
-
-    float moveSpeed = speed * inputLength;
-
-    m_Move.x = move.x * moveSpeed;
-    m_Move.z = move.z * moveSpeed;
-
-    m_TargetYawValue = atan2f(move.x, move.z);
-    DirectionRot();
-
-    return true;
 }
 
 // カメラ基準の移動方向を取得する
@@ -365,6 +330,24 @@ void Player::TakeDamage(int damage)
     }
 }
 
+void Player::Kill()
+{
+    // すでに死亡している場合は何もしない
+    if (IsDead())
+    {
+        return;
+    }
+
+    // HPを0にして死亡状態にする
+    CharacterBase::TakeDamage(m_HP);
+
+    // 死亡ステートへ遷移
+    if (m_pState != nullptr)
+    {
+        m_pState->ChangeState(std::make_unique<PlayerStateDead>());
+    }
+}
+
 // リスポーン地点を設定
 void Player::SetRespawnPoint(VECTOR pos, VECTOR rot)
 {
@@ -403,42 +386,52 @@ void Player::Respawn()
     m_CoyoteTime = 0.0f;
     m_JumpBufferTime = 0.0f;
 
+    // 復活したことを通知
+    m_HasRespawned = true;
+
     // 待機ステートへ遷移
     if (m_pState != nullptr)
     {
         m_pState->ChangeState(std::make_unique<PlayerStateIdle>());
     }
-
-    // 敵を初期配置から再生成
-    StageManager::GetInstance()->ResetEnemies();
-
 }
 
+//分離候補
+// ステージ当たり判定
 void Player::CheckHitStageObjects(const std::vector<StageObject*>& objects)
 {
-	m_Pos.x += m_Move.x * TARGET_FPS * FPSSystem::GetDeltaTime();
+    bool wasGround = m_IsGround;
 
-    // 共通処理に委譲（OnLand/OnLeaveGround は自動で呼ばれる）
-    ResolveStageCollisions(objects, FPSSystem::GetDeltaTime());
+    // 共通処理で衝突解決（m_Pos, m_Move, m_IsGround を更新）
+    ResolveStageCollisions(objects);
+
+    if (m_IsGround)
+    {
+        // 着地したのでコヨーテタイム終了
+        m_CoyoteTime = 0.0f;
+
+        m_AttackComponent.SetHasAirAttacked(false);
+
+        m_LastGroundY = m_Pos.y;
+    }
+    else
+    {
+        // 地面から離れた瞬間だけコヨーテタイム開始
+        if (wasGround)
+        {
+            m_CoyoteTime = m_CoyoteTimeMax;
+        }
+        else if (m_CoyoteTime > 0.0f)
+        {
+            m_CoyoteTime -= FPSSystem::GetDeltaTime();
+
+            if (m_CoyoteTime < 0.0f)
+            {
+                m_CoyoteTime = 0.0f;
+            }
+        }
+    }
 }
-
-// ステージ当たり判定
-void Player::OnLand()
-{
-    // 着地したのでコヨーテタイム終了
-    m_CoyoteTime = 0.0f;
-
-    m_AttackComponent.SetHasAirAttacked(false);
-
-    m_LastGroundY = m_Pos.y;
-}
-
-void Player::OnLeaveGround()
-{
-    // 地面を離れた瞬間の処理（コヨーテ開始）
-    m_CoyoteTime = m_CoyoteTimeMax;
-}
-
 
 bool Player::CheckAttackHit(CollisionAABB* target)
 {
@@ -462,8 +455,13 @@ bool Player::CheckAttackHit(CollisionAABB* target)
     return false;
 }
 
+// GetStateType(): m_pStateのnullガード
 PlayerStateType Player::GetStateType() const
 {
+    if (m_pState == nullptr)
+    {
+        return PlayerStateType::IDLE; 
+    }
     return m_pState->GetStateType();
 }
 
