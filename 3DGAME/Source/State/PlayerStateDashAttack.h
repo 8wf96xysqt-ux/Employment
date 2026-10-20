@@ -1,13 +1,16 @@
 #pragma once
 
 #include "PlayerStateBase.h"
+#include "../Attack/AttackCombo.h"
+
 struct AttackData;
+struct PlayerData;
 
 class PlayerStateDashAttack : public PlayerStateBase
 {
 public:
     PlayerStateDashAttack();
-    ~PlayerStateDashAttack() {};
+	~PlayerStateDashAttack() = default;
 
     void Enter(Player* player) override;
     void Update() override;
@@ -20,9 +23,9 @@ public:
 
 private:
     bool m_IsRightPunch;
-    bool m_AttackBuffered;
+    AttackCombo m_AttackCombo;
     const AttackData* m_AttackData;
+    const PlayerData* m_PlayerData;
 
-private:
     void PlayAttackAnimation();
 };

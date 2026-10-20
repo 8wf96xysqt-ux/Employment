@@ -11,8 +11,6 @@ constexpr int MAX_AIR_ATTACK_COUNT = 3;
 
 PlayerStateAirAttack::PlayerStateAirAttack()
     : m_IsRightPunch(true)
-    , m_AttackBuffered(false)
-    , m_AttackCount(0)
     , m_AttackData(nullptr)
 {
 }
@@ -23,8 +21,7 @@ void PlayerStateAirAttack::Enter(Player* player)
 
     // Å‰‚ÌUŒ‚
     m_IsRightPunch = true;
-    m_AttackBuffered = false;
-    m_AttackCount = 1;
+    m_AttackCombo.Start(MAX_AIR_ATTACK_COUNT);
 
     // Air1‚ðŽæ“¾
     m_AttackData = AttackDataManager::GetInstance()->GetAttackData(PlayerAttackType::AIR_1);
@@ -59,7 +56,7 @@ void PlayerStateAirAttack::Update()
     // UŒ‚“ü—Í‚ð—\–ñ
     if (Input::IsAttack())
     {
-        m_AttackBuffered = true;
+        m_AttackCombo.BufferInput();
     }
 
     // ‹ó’†UŒ‚’†‚Í’âŽ~
@@ -77,18 +74,17 @@ void PlayerStateAirAttack::Update()
     float rate = player->GetAnimationNowTime() / totalTime;
 
     // ŽŸ‚ÌUŒ‚‚Ö
-    if (rate >= m_AttackData->chainRate && m_AttackBuffered && m_AttackCount < MAX_AIR_ATTACK_COUNT)
+    if (m_AttackCombo.CanNextAttack(rate, m_AttackData->chainRate))
     {
-        m_AttackBuffered = false;
-
-        // UŒ‚‰ñ”‚ð‘‚â‚·
-        m_AttackCount++;
+        m_AttackCombo.Next();
 
         // ‰E ¨ ¶ ¨ ‰E
         m_IsRightPunch = !m_IsRightPunch;
 
         // Air1 / Air2‚ðŽæ“¾
-        PlayerAttackType attackType = m_IsRightPunch ? PlayerAttackType::AIR_1 : PlayerAttackType::AIR_2;
+        PlayerAttackType attackType = m_IsRightPunch
+            ? PlayerAttackType::AIR_1
+            : PlayerAttackType::AIR_2;
 
         m_AttackData = AttackDataManager::GetInstance()->GetAttackData(attackType);
 
@@ -119,17 +115,14 @@ void PlayerStateAirAttack::Update()
 
 void PlayerStateAirAttack::Exit()
 {
+    m_AttackCombo.ClearBuffer();
     m_pPlayer->GetAttackComponent()->EndAttack();
     m_pPlayer->ResetGravity();
 }
 
 void PlayerStateAirAttack::PlayAttackAnimation()
 {
-    m_pPlayer->PlayAnimation(
-        m_AttackData->animation,
-        false,
-        m_AttackData->animationSpeed
-    );
+    m_pPlayer->PlayAnimation(m_AttackData->animation,false,m_AttackData->animationSpeed);
 
     AttackComponent* attack = m_pPlayer->GetAttackComponent();
 

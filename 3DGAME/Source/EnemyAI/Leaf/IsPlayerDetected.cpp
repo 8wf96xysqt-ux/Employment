@@ -28,15 +28,13 @@ void IsPlayerDetected::Tick()
         return;
     }
 
-    VECTOR direction =
-        MyMath::VecSub(player->GetPos(), enemy->GetPos());
+    VECTOR direction = MyMath::VecSub(player->GetPos(), enemy->GetPos());
 
     direction.y = 0.0f;
 
     float distance = MyMath::VecLong(direction);
 
-    bool isChasing =
-        m_BlackBoard->GetValue<bool>("IsChasing");
+    bool isChasing = m_BlackBoard->GetValue<bool>("IsChasing");
 
     if (!isChasing)
     {

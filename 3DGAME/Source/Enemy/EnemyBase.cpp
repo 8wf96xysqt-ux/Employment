@@ -7,7 +7,9 @@
 #include "../StageObject/StageObject.h"
 #include "../Collision/CollisionAABB.h"
 #include "../Camera/CameraManager.h"
+#include "../Random/Random.h"
 #include <cmath>
+
 
 
 namespace
@@ -16,12 +18,18 @@ namespace
     constexpr float PATROL_MOVE_SPEED = 0.025f;
     constexpr float KNOCKBACK_TIME = 0.35f;
     constexpr float KNOCKBACK_GRAVITY = 0.02f;
+
+    constexpr float MIN_MOVE_WAIT = 0.1f;
+    constexpr float MAX_MOVE_WAIT = 1.0f;
 }
 
 EnemyBase::EnemyBase()
     : m_KnockbackVelocity(VGet(0.0f, 0.0f, 0.0f))
     , m_KnockbackTime(0.0f)
     , m_IsKnockback(false)
+    , m_MoveWaitTime(0.0f)
+    , m_MoveTimer(0.0f)
+    , m_IsMoveWaiting(true)
 {
     m_BasePos = VGet(0.0f, 0.0f, 0.0f);
     m_MovementSpeed = PATROL_MOVE_SPEED;
@@ -43,6 +51,11 @@ void EnemyBase::SetMovementParameter(
     m_PatrolPoints = points;
 
     SetBasePos(m_Pos);
+
+    // 移動開始タイミングをランダムに設定
+    m_MoveWaitTime = Random::GetFloat(MIN_MOVE_WAIT, MAX_MOVE_WAIT);
+    m_MoveTimer = 0.0f;
+    m_IsMoveWaiting = true;
 }
 
 void EnemyBase::UpdateMovementPattern()
@@ -52,6 +65,23 @@ void EnemyBase::UpdateMovementPattern()
     float deltaTime = FPSSystem::GetDeltaTime();
     if (deltaTime <= 0.0f) return;
 
+    // ランダムな待機時間が終わるまで移動しない
+    if (m_IsMoveWaiting)
+    {
+        m_MoveTimer += deltaTime;
+
+        m_Move.x = 0.0f;
+        m_Move.z = 0.0f;
+
+        if (m_MoveTimer < m_MoveWaitTime)
+        {
+            return;
+        }
+
+        m_IsMoveWaiting = false;
+    }
+
+    // ここから下は既存の円移動・巡回移動の処理
     if (m_MovementType == 0)
     {
         float angleSpeed = CIRCLE_MOVE_SPEED * TARGET_FPS * deltaTime;
@@ -165,61 +195,8 @@ void EnemyBase::CheckHitStageObjects(const std::vector<StageObject*>& objects)
 {
     if (!m_AABB) return;
 
-    float deltaTime = FPSSystem::GetDeltaTime();
-
-    // X軸
-    m_Pos.x += m_Move.x * TARGET_FPS * deltaTime;
-
-    for (auto obj : objects)
-    {
-        if (!obj) continue;
-
-        const CollisionAABB* objAABB = obj->GetAABB();
-        if (!objAABB) continue;
-
-        if (m_AABB->CheckAABB(objAABB))
-        {
-            m_Pos.x = m_PrevPos.x;
-            break;
-        }
-    }
-
-    // Y軸
-    m_Pos.y += m_Move.y * TARGET_FPS * deltaTime;
-    m_IsGround = false;
-
-    for (auto obj : objects)
-    {
-        if (!obj) continue;
-
-        const CollisionAABB* objAABB = obj->GetAABB();
-        if (!objAABB) continue;
-
-        if (m_AABB->CheckAABB(objAABB))
-        {
-            m_Pos.y = m_PrevPos.y;
-            m_Move.y = 0.0f;
-            m_IsGround = true;
-            break;
-        }
-    }
-
-    // Z軸
-    m_Pos.z += m_Move.z * TARGET_FPS * deltaTime;
-
-    for (auto obj : objects)
-    {
-        if (!obj) continue;
-
-        const CollisionAABB* objAABB = obj->GetAABB();
-        if (!objAABB) continue;
-
-        if (m_AABB->CheckAABB(objAABB))
-        {
-            m_Pos.z = m_PrevPos.z;
-            break;
-        }
-    }
+    // m_PrevPos は呼び出し側で更新されている前提（既存コードのまま）
+    ResolveStageCollisions(objects);
 }
 
 bool EnemyBase::IsKnockback() const

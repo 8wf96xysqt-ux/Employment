@@ -90,10 +90,7 @@ void EnemyManager::CheckPlayerAttack(Player* player)
         if (!enemyAABB) continue;
         if (player->CheckAttackHit(enemyAABB)) { enemy->TakeDamage(1); }
     }
-    m_Enemies.erase(
-        std::remove_if(
-            m_Enemies.begin(),
-            m_Enemies.end(),
+    m_Enemies.erase(std::remove_if(m_Enemies.begin(),m_Enemies.end(),
             [](const std::unique_ptr<EnemyBase>& enemy)
             {
                 if (!enemy) return true;

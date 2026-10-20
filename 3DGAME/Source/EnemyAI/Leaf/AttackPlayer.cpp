@@ -2,12 +2,12 @@
 #include "../Blackboard/BlackBoard.h"
 #include "../Core/NodeResult.h"
 #include "../../Enemy/EnemyBase.h"
-#include "../../Enemy/NormalEnemy.h"
 #include "../../Player/Player.h"
 #include "../../Collision/CollisionManager.h"
 #include "../../Collision/CollisionOBB.h"
 #include "../../Collision/CollisionAABB.h"
 #include "../../FPS/FPS.h"
+#include "../../Animation/NormalEnemyAnimParam..h"
 #include <cmath>
 
 namespace
@@ -110,15 +110,7 @@ void AttackPlayer::Tick()
     // 攻撃中でなければ攻撃を開始
     if (!m_IsAttacking && m_Cooldown <= 0.0f)
     {
-        NormalEnemy* normalEnemy = dynamic_cast<NormalEnemy*>(enemy);
-
-        if (normalEnemy)
-        {
-            normalEnemy->PlayAnimation(
-                NORMAL_ANIMATION_ATTACK01,
-                false,
-                1.0f);
-        }
+        enemy->PlayAnimation(NORMAL_ANIMATION_ATTACK01, false, 0.8f);
 
         m_IsAttacking = true;
         m_HasHit = false;
@@ -127,17 +119,8 @@ void AttackPlayer::Tick()
     // 攻撃アニメーションの更新
     if (m_IsAttacking)
     {
-        NormalEnemy* normalEnemy = dynamic_cast<NormalEnemy*>(enemy);
-
-        if (!normalEnemy)
-        {
-            Finalize();
-            m_NodeResult = NodeResult::Fail;
-            return;
-        }
-
-        float totalTime = normalEnemy->GetAnimationTotalTime();
-        float nowTime = normalEnemy->GetAnimationNowTime();
+        float totalTime = enemy->GetAnimationTotalTime();
+        float nowTime = enemy->GetAnimationNowTime();
 
         if (totalTime <= 0.0f)
         {
@@ -167,9 +150,9 @@ void AttackPlayer::Tick()
             nowTime >= startTime && nowTime <= endTime);
 
         // 攻撃判定が有効な時間だけ命中を調べる
-        if (m_AttackOBB->IsActive() &&
-            !m_HasHit &&
-            player->GetAABB()->CheckOBB(m_AttackOBB))
+        if (m_AttackOBB->IsActive()
+            && !m_HasHit
+            && player->GetAABB()->CheckOBB(m_AttackOBB))
         {
             player->TakeDamage(ATTACK_DAMAGE);
             m_HasHit = true;
@@ -182,10 +165,7 @@ void AttackPlayer::Tick()
             m_IsAttacking = false;
             m_Cooldown = ATTACK_COOLDOWN;
 
-            normalEnemy->PlayAnimation(
-                NORMAL_ANIMATION_IDLE,
-                true,
-                0.8f);
+            enemy->PlayAnimation(NORMAL_ANIMATION_IDLE, true, 0.8f);
         }
     }
 

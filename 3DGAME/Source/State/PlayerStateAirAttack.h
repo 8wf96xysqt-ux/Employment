@@ -1,5 +1,7 @@
 #pragma once
+
 #include "PlayerStateBase.h"
+#include "../Attack/AttackCombo.h"
 
 struct AttackData;
 
@@ -7,7 +9,7 @@ class PlayerStateAirAttack : public PlayerStateBase
 {
 public:
     PlayerStateAirAttack();
-    ~PlayerStateAirAttack(){};
+    ~PlayerStateAirAttack() = default;
 
     void Enter(Player* player) override;
     void Update() override;
@@ -22,15 +24,10 @@ private:
     // 攻撃の右・左
     bool m_IsRightPunch;
 
-    // 次の攻撃入力
-    bool m_AttackBuffered;
-
-    //攻撃カウント
-    int m_AttackCount;
+    // コンボ管理
+    AttackCombo m_AttackCombo;
 
     const AttackData* m_AttackData;
 
-
-private:
     void PlayAttackAnimation();
 };

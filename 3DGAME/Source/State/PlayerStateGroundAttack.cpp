@@ -6,9 +6,10 @@
 #include "../Input/Input.h"
 #include "../ParameterData/AttackDataManager.h"
 
+constexpr int MAX_GROUND_ATTACK_COUNT = 3;
+
 PlayerStateGroundAttack::PlayerStateGroundAttack()
     : m_IsRightPunch(true)
-    , m_AttackBuffered(false)
     , m_AttackData(nullptr)
 {
 }
@@ -19,7 +20,7 @@ void PlayerStateGroundAttack::Enter(Player* player)
 
     // Å‰‚Í‰Eƒpƒ“ƒ`
     m_IsRightPunch = true;
-    m_AttackBuffered = false;
+    m_AttackCombo.Start(MAX_GROUND_ATTACK_COUNT);
 
     // Ground1‚ðŽæ“¾
     m_AttackData = AttackDataManager::GetInstance()->GetAttackData(PlayerAttackType::GROUND_1);
@@ -47,7 +48,7 @@ void PlayerStateGroundAttack::Update()
     // ŽŸ‚ÌUŒ‚“ü—Í‚ð—\–ñ
     if (Input::IsAttack())
     {
-        m_AttackBuffered = true;
+        m_AttackCombo.BufferInput();
     }
 
     float totalTime = player->GetAnimationTotalTime();
@@ -61,9 +62,9 @@ void PlayerStateGroundAttack::Update()
     float rate = player->GetAnimationNowTime() / totalTime;
 
     // UŒ‚Œã”¼‚ÅŽŸ‚Ìƒpƒ“ƒ`‚Ö
-    if (rate >= m_AttackData->chainRate && m_AttackBuffered)
+    if (m_AttackCombo.CanNextAttack(rate, m_AttackData->chainRate))
     {
-        m_AttackBuffered = false;
+        m_AttackCombo.Next();
 
         // ‰E ¨ ¶
         m_IsRightPunch = !m_IsRightPunch;
@@ -98,16 +99,13 @@ void PlayerStateGroundAttack::Update()
 
 void PlayerStateGroundAttack::Exit()
 {
+    m_AttackCombo.ClearBuffer();
     m_pPlayer->GetAttackComponent()->EndAttack();
 }
 
 void PlayerStateGroundAttack::PlayAttackAnimation()
 {
-    m_pPlayer->PlayAnimation(
-        m_AttackData->animation,
-        false,
-        m_AttackData->animationSpeed
-    );
+    m_pPlayer->PlayAnimation(m_AttackData->animation,false,m_AttackData->animationSpeed);
 
     AttackComponent* attack = m_pPlayer->GetAttackComponent();
 

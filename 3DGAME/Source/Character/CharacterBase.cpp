@@ -97,6 +97,18 @@ void CharacterBase::SetPos(VECTOR pos)
     m_Pos = pos;
 }
 
+// 現在のアニメーション時間
+float CharacterBase::GetAnimationNowTime() const
+{
+    return m_Animation.GetNowTime();
+}
+
+// アニメーション全体の時間
+float CharacterBase::GetAnimationTotalTime() const
+{
+    return m_Animation.GetTotalTime();
+}
+
 // 回転設定
 void CharacterBase::SetRot(VECTOR rot)
 {
@@ -164,6 +176,75 @@ void CharacterBase::UpdateInvincible()
     {
         m_InvincibleTime = 0.0f;
         m_IsInvincible = false;
+    }
+}
+
+// ステージ当たり判定の共通処理
+// ※ 現状のコードで用いられている時間単位（TARGET_FPS * deltaTime）のまま実装しています。
+    //将来的に "速度 = 単位/秒" に統一する
+void CharacterBase::ResolveStageCollisions(const std::vector<StageObject*>& objects)
+{
+    if (!m_AABB) return;
+
+    float deltaTime = FPSSystem::GetDeltaTime();
+
+    // X
+    m_Pos.x += m_Move.x * TARGET_FPS * deltaTime;
+
+    for (auto obj : objects)
+    {
+        if (!obj) continue;
+        const CollisionAABB* objAABB = obj->GetAABB();
+        if (!objAABB) continue;
+
+        if (m_AABB->CheckAABB(objAABB))
+        {
+            m_Pos.x = m_PrevPos.x;
+            break;
+        }
+    }
+
+    // Y
+    bool hitGround = false;
+    float moveY = m_Move.y * TARGET_FPS * deltaTime;
+
+    m_Pos.y += moveY;
+
+    for (auto obj : objects)
+    {
+        if (!obj) continue;
+        const CollisionAABB* objAABB = obj->GetAABB();
+        if (!objAABB) continue;
+
+        if (m_AABB->CheckAABB(objAABB))
+        {
+            m_Pos.y = m_PrevPos.y;
+            m_Move.y = 0.0f;
+
+            if (moveY < 0.0f)
+            {
+                hitGround = true;
+            }
+            break;
+        }
+    }
+
+    m_IsGround = hitGround;
+
+    // Z
+    m_Pos.z += m_Move.z * TARGET_FPS * deltaTime;
+
+    for (auto obj : objects)
+    {
+        if (!obj) continue;
+        const CollisionAABB* objAABB = obj->GetAABB();
+        if (!objAABB) continue;
+
+        if (m_AABB->CheckAABB(objAABB))
+        {
+            m_Pos.z = m_PrevPos.z;
+            break;
+        }
     }
 }
 

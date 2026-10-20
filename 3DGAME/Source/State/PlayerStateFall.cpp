@@ -3,7 +3,7 @@
 #include "PlayerStateAirAttack.h"
 #include "PlayerStateHover.h"
 #include "../Player/Player.h"
-#include "../MyMath/MyMath.h"
+#include "../Movement/PlayerAirMovement.h"
 #include "../FPS/FPS.h"
 #include "../Input/Input.h"
 #include "../ParameterData/PlayerDataManager.h"
@@ -42,7 +42,7 @@ void PlayerStateFall::Update()
     if (player->IsGround())
     {
         player->SetHasHovered(false);
-       ChangeState(std::make_unique<PlayerStateIdle>());
+        ChangeState(std::make_unique<PlayerStateIdle>());
         return;
     }
 
@@ -55,28 +55,7 @@ void PlayerStateFall::Update()
     }
 
     // 空中移動
-    VECTOR move = player->GetMove();
-    VECTOR airMove = player->GetCameraMoveInput();
-
-    float length = MyMath::VecLong(airMove);
-
-    if (length > m_PlayerData->moveInputThreshold)
-    {
-        airMove = MyMath::VecNormalize(airMove);
-
-        move.x = airMove.x * m_PlayerData->airMoveSpeed;
-        move.z = airMove.z * m_PlayerData->airMoveSpeed;
-
-        player->SetTargetYaw(atan2f(airMove.x, airMove.z));
-        player->DirectionRot();
-    }
-    else
-    {
-        move.x = 0.0f;
-        move.z = 0.0f;
-    }
-
-    player->SetMove(move);
+    PlayerAirMovement::Update(player,m_PlayerData->airMoveSpeed,m_PlayerData->moveInputThreshold);
 
     // Fallアニメーション開始まで待つ
     if (m_FallAnimDelay > 0.0f)

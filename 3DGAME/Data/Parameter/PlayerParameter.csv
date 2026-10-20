@@ -7,7 +7,7 @@ RunInputThreshold,0.6
 JumpPower,0.16
 JumpHoldPower,0.001
 JumpCutRate,0.3
-CoyoteTime,5
+CoyoteTime,0.12
 JumpBufferTime,0.15
 FallAnimDelay,0.3
 RollSpeed,0.07
@@ -16,6 +16,7 @@ HoverRiseSpeed,0.05
 HoverRiseHeight,0.6
 HoverTime,0.8
 HoverMoveSpeed,0.07
+MaxHp,5
 Scale,0.7
 AABBSizeX,0.5
 AABBSizeY,1

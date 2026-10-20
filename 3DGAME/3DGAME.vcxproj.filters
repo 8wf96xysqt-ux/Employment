@@ -106,6 +106,12 @@
     <Filter Include="Source\GameTime">
       <UniqueIdentifier>{fa6c25fb-6bc6-4143-bcc5-ab37e249e169}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Movement">
+      <UniqueIdentifier>{46cce1c3-fc4a-4acf-a7e5-c9b1eee83cf1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Random">
+      <UniqueIdentifier>{5bccd73c-9470-4294-a41f-b41d01ad8e40}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Main.cpp">
@@ -299,6 +305,21 @@
     </ClCompile>
     <ClCompile Include="Source\GameTime\GameTime.cpp">
       <Filter>Source\GameTime</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Attack\AttackCombo.cpp">
+      <Filter>Source\Attack</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Movement\PlayerAirMovement.cpp">
+      <Filter>Source\Movement</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Movement\PlayerGroundMovement.cpp">
+      <Filter>Source\Movement</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Attack\PlayerHoverBeam.cpp">
+      <Filter>Source\Attack</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Random\Random.cpp">
+      <Filter>Source\Random</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -544,6 +565,21 @@
     </ClInclude>
     <ClInclude Include="Source\GameTime\GameTime.h">
       <Filter>Source\GameTime</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Attack\AttackCombo.h">
+      <Filter>Source\Attack</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Movement\PlayerAirMovement.h">
+      <Filter>Source\Movement</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Movement\PlayerGroundMovement.h">
+      <Filter>Source\Movement</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Attack\PlayerHoverBeam.h">
+      <Filter>Source\Attack</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Random\Random.h">
+      <Filter>Source\Random</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

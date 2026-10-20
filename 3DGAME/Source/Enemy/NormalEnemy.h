@@ -23,20 +23,7 @@ public:
     bool IsDeathAnimationFinished() const override;
 
     // アニメーション
-    float GetAnimationNowTime() const
-    {
-        return m_Animation.GetNowTime();
-    }
-
-    float GetAnimationTotalTime() const
-    {
-        return m_Animation.GetTotalTime();
-    }
-
-    void PlayAnimation(NormalEnemyAnimationType anim,bool isLoop,float speed)
-    {
-        m_Animation.Play(anim, isLoop, speed);
-    }
+    void PlayAnimation(int anim, bool isLoop, float speed) override;
 
 private:
     VECTOR m_BasePos;

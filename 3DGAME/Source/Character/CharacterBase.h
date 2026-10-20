@@ -51,12 +51,20 @@ public:
     // 移動量
     VECTOR GetMove() const { return m_Move; }
     void SetMove(VECTOR move) { m_Move = move; }
+
+    // アニメーション時間取得
+    float GetAnimationNowTime() const;
+    float GetAnimationTotalTime() const;
 private:
     float RotCap(float rot);
 
 protected:
     // 無敵時間更新
     void UpdateInvincible();
+
+    // ステージ当たり判定の共通処理（軸分離方式）
+    //クラスは必要に応じてこのヘルパを呼び、固有処理を追加する
+    void ResolveStageCollisions(const std::vector<StageObject*>& objects);
 
     VECTOR m_Pos;
     VECTOR m_Rot;

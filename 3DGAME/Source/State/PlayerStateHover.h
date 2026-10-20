@@ -1,42 +1,33 @@
 #pragma once
 
 #include "PlayerStateBase.h"
+#include "../Attack/PlayerHoverBeam.h"
 
-class EffekseerEffect;
-class CollisionOBB;
 struct PlayerData;
-struct AttackData;
 
 class PlayerStateHover : public PlayerStateBase
 {
 public:
     PlayerStateHover();
-    ~PlayerStateHover() {};
+    ~PlayerStateHover() override = default;
 
     void Enter(Player* player) override;
     void Update() override;
     void Exit() override;
     bool CheckAttackHit(CollisionAABB* target) override;
 
-    PlayerStateType GetStateType() const override 
+    PlayerStateType GetStateType() const override
     {
         return PlayerStateType::HOVER;
     }
 
 private:
-    void UpdateHoverMovement();
-    void UpdateBeamOBB();
-    void UpdateBeamEffects();
+    bool UpdateHoverMovement();
+
     float m_StartY;
     float m_HoverTime;
     float m_HoverTimeMax;
     bool m_IsRising;
-    EffekseerEffect* m_LeftBeamEffect;
-    EffekseerEffect* m_RightBeamEffect;
-    EffekseerEffect* m_LeftBeamHitEffect;
-    EffekseerEffect* m_RightBeamHitEffect;
-    CollisionOBB* m_LeftBeamOBB;
-    CollisionOBB* m_RightBeamOBB;
     const PlayerData* m_PlayerData;
-    const AttackData* m_AttackData;
+    PlayerHoverBeam m_HoverBeam;
 };

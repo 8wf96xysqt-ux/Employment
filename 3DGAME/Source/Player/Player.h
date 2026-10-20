@@ -29,8 +29,6 @@ public:
     void Fin();
 
     const char* GetStateTypeName() const;
-    
-    bool UpdateMove(float speed);
     void DirectionRot();
     float GetGroundY() const { return m_LastGroundY; }
 
@@ -54,6 +52,8 @@ public:
     bool IsJumpBuffered() const { return m_JumpBufferTime > 0.0f; }
     void ResetJumpBuffer() { m_JumpBufferTime = 0.0f; }
 
+
+
     void UpdateJumpBuffer()
     {
         if (m_JumpBufferTime > 0.0f)
@@ -62,15 +62,6 @@ public:
         }
     }
 
-    // アニメーション
-    float GetAnimationNowTime() const 
-    { 
-        return m_Animation.GetNowTime(); 
-    }
-    float GetAnimationTotalTime() const 
-    { 
-        return m_Animation.GetTotalTime(); 
-    }
     void PlayAnimation(PlayerAnimationType anim, bool isLoop, float speed)
     {
         m_Animation.Play(anim, isLoop, speed);
@@ -88,6 +79,10 @@ public:
     void SetRespawnPoint(VECTOR pos, VECTOR rot);
     VECTOR GetRespawnPoint() const;
     void Respawn();
+
+    // リスポーン通知
+    bool HasRespawned() const { return m_HasRespawned; }
+    void ResetRespawned() { m_HasRespawned = false; }
 
     void CheckHitStageObjects(const std::vector<StageObject*>& objects);
     bool CheckAttackHit(CollisionAABB* target);
@@ -110,6 +105,9 @@ private:
     // リスポーン地点
     VECTOR m_RespawnPos;
     VECTOR m_RespawnRot;
+
+    // リスポーン通知
+    bool m_HasRespawned = false;
 
     float m_LastGroundY;
 };
